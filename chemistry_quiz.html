@@ -1,0 +1,2133 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大学化学章节刷题</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #64748b;
+      --line: #d8e0ea;
+      --primary: #2563eb;
+      --primary-soft: #eff6ff;
+      --green: #15803d;
+      --green-bg: #ecfdf3;
+      --red: #b91c1c;
+      --red-bg: #fef2f2;
+      --amber: #92400e;
+      --amber-bg: #fffbeb;
+      --shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.65;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(245, 247, 251, 0.96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .wrap { width: min(1160px, calc(100% - 28px)); margin: 0 auto; }
+    .top { padding: 16px 0 14px; display: grid; gap: 12px; }
+    h1 { margin: 0; font-size: clamp(22px, 3vw, 34px); letter-spacing: 0; }
+    h2 { margin: 24px 0 12px; font-size: 20px; }
+    h3 { margin: 0 0 10px; font-size: 17px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+
+    .controls, .modebar, .sectionbar, .actions, .judge-row, .self-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .controls {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+    }
+    label { font-weight: 650; }
+    select, input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+    select { width: auto; min-width: 230px; }
+    textarea { min-height: 110px; resize: vertical; }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 7px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:hover { border-color: #94a3b8; }
+    button.primary { background: var(--primary); border-color: var(--primary); color: white; }
+    button.active { background: var(--primary-soft); border-color: var(--primary); color: #1d4ed8; }
+    button.good { background: var(--green-bg); border-color: #86efac; color: var(--green); }
+    button.bad { background: var(--red-bg); border-color: #fecaca; color: var(--red); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+    }
+    .stat b { display: block; font-size: 22px; line-height: 1.1; }
+    .stat span { color: var(--muted); font-size: 13px; }
+
+    main { padding: 22px 0 42px; }
+    .notice {
+      background: var(--amber-bg);
+      border: 1px solid #fde68a;
+      color: var(--amber);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      margin: 12px 0;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin: 14px 0;
+    }
+    .card.wrong { border-color: #fecaca; box-shadow: 0 8px 22px rgba(185, 28, 28, 0.10); }
+    .q-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .q-no { font-weight: 800; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid #e2e8f0;
+      background: #f1f5f9;
+      color: #475569;
+      border-radius: 999px;
+      padding: 2px 9px;
+      font-size: 12px;
+    }
+    .tag.wrong-tag { background: var(--red-bg); color: var(--red); border-color: #fecaca; }
+    .question { margin: 8px 0 12px; font-size: 16px; }
+
+    .options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .option { text-align: left; }
+    .option.selected { background: var(--primary-soft); border-color: var(--primary); color: #1d4ed8; }
+    .option.correct { background: var(--green-bg); border-color: #86efac; color: var(--green); }
+    .option.incorrect { background: var(--red-bg); border-color: #fecaca; color: var(--red); }
+
+    .feedback {
+      display: none;
+      margin-top: 12px;
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+    }
+    .feedback.show { display: block; }
+    .feedback.correct { background: var(--green-bg); border-color: #86efac; color: var(--green); }
+    .feedback.incorrect { background: var(--red-bg); border-color: #fecaca; color: var(--red); }
+    .feedback.neutral { background: #f8fafc; color: #334155; }
+
+    details {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdff;
+      overflow: hidden;
+    }
+    summary { cursor: pointer; padding: 10px 12px; font-weight: 700; }
+    details[open] summary { border-bottom: 1px solid var(--line); }
+    .analysis, .answer-box { padding: 12px; }
+    .answer-box {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f8fafc;
+    }
+    .answer-box.show { display: block; }
+    .formula {
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: "Cascadia Mono", Consolas, "Courier New", monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .wrong-list { display: grid; gap: 12px; }
+    .wrong-item {
+      background: var(--card);
+      border: 1px solid #fecaca;
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+    .extension {
+      border: 1px dashed #94a3b8;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin: 14px 0;
+    }
+    .hidden { display: none !important; }
+
+    @media (min-width: 760px) {
+      .top { grid-template-columns: 1fr 1fr; align-items: end; }
+      .title-block, .controls, .sectionbar { grid-column: 1 / -1; }
+      .options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 660px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      select { width: 100%; }
+      .controls button, .modebar button, .sectionbar button { flex: 1 1 auto; }
+      .card { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap top">
+      <div class="title-block">
+        <h1>大学化学章节刷题</h1>
+        <div class="muted small">当前题库：来自 01-quiz.md。页面已按章节组织，后续可继续注册第 02 章、第 03 章等题库。</div>
+      </div>
+
+      <div class="controls">
+        <label for="chapterSelect">章节</label>
+        <select id="chapterSelect"></select>
+        <div class="modebar">
+          <button id="practiceBtn" class="active" type="button">练习模式</button>
+          <button id="examBtn" type="button">考试模式</button>
+          <button id="submitAllBtn" class="primary hidden" type="button">提交全部</button>
+          <button id="resetBtn" type="button">重做本章</button>
+        </div>
+      </div>
+
+      <div class="sectionbar" id="sectionBar"></div>
+
+      <div class="stats">
+        <div class="stat"><b id="statTotal">0</b><span>本筛选题数</span></div>
+        <div class="stat"><b id="statDone">0</b><span>已完成</span></div>
+        <div class="stat"><b id="statCorrect">0</b><span>正确题数</span></div>
+        <div class="stat"><b id="statRate">0%</b><span>正确率</span></div>
+      </div>
+
+      <div class="muted small" id="modeHint">练习模式：每题提交后立即显示对错，可以随时查看解析。</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="notice">
+      说明：选择题、判断题和部分填空题可自动判分；计算题、综合题需要查看答案后自行标记“答对/答错”。考试模式提交前不显示答案和解析。
+    </div>
+
+    <details class="extension">
+      <summary>扩展说明：以后按章节加入新的 Markdown</summary>
+      <p class="muted">本页的扩展点是“章节题库”。以后新增章节时，把新的 Markdown 转成一个章节对象，再调用 <code>registerChapter(chapter)</code> 即可出现在章节下拉框里。章节对象结构如下：</p>
+      <div class="formula">registerChapter({
+  id: "02",
+  title: "第二章 溶液",
+  source: "02-quiz.md",
+  questions: [
+    { id: "02-b1", section: "基础概念题", type: "choice", ... }
+  ]
+});</div>
+      <textarea id="markdownInput" placeholder="预留：以后可粘贴新的 quiz.md，先预览可识别的编号题。完整自动导入需要把答案解析也映射成题库对象。"></textarea>
+      <div class="actions">
+        <button type="button" id="previewMarkdownBtn">预览 Markdown 题目数</button>
+      </div>
+      <div id="markdownPreview" class="feedback neutral"></div>
+    </details>
+
+    <div id="examResult" class="card hidden"></div>
+    <div id="quizRoot"></div>
+
+    <h2>错题汇总</h2>
+    <div id="wrongSummary" class="wrong-list"></div>
+  </main>
+
+  <script>
+    const quizBank = [];
+    const stateByChapter = {};
+
+    registerChapter({
+      id: "01",
+      title: "01 第一章 气体与液体",
+      source: "01-quiz.md",
+      questions: [
+        {
+          id: "01-b1", section: "基础概念题", type: "fill", knowledge: "理想气体模型",
+          prompt: "理想气体的两个基本假设是什么？",
+          answerText: "分子间作用力可忽略；分子本身体积相对于气体体积可忽略。",
+          explanation: "理想气体是一个假想模型，忽略真实气体中最重要的两类偏差：分子间作用力和分子自身占据的体积。"
+        },
+        {
+          id: "01-b2", section: "基础概念题", type: "fill", knowledge: "摩尔气体常数",
+          prompt: "气体状态方程 <b>pV = nRT</b> 中，若 p 用 Pa、V 用 m<sup>3</sup>、n 用 mol、T 用 K，则 R = ______。",
+          accepted: ["8.314", "8.31"], answerText: "8.314 Pa·m³·mol⁻¹·K⁻¹",
+          explanation: "当压力用 Pa、体积用 m³ 时，R 取 8.314 Pa·m³·mol⁻¹·K⁻¹。若使用 kPa 和 dm³，常用 8.31 kPa·dm³·mol⁻¹·K⁻¹。"
+        },
+        {
+          id: "01-b3", section: "基础概念题", type: "choice", knowledge: "理想气体适用条件",
+          prompt: "下列条件下，真实气体最接近理想气体的是",
+          options: [["A", "高温低压"], ["B", "高温高压"], ["C", "低温高压"], ["D", "低温低压"]],
+          answer: "A", answerText: "A. 高温低压",
+          explanation: "高温使分子间作用相对减弱，低压使分子间距增大、分子自身体积影响减小，所以最接近理想气体。"
+        },
+        {
+          id: "01-b4", section: "基础概念题", type: "fill", knowledge: "道尔顿分压定律",
+          prompt: "混合气体中某组分的分压等于总压乘以该组分的 ______。",
+          accepted: ["摩尔分数", "物质的量分数"], answerText: "摩尔分数",
+          explanation: "理想混合气体中，P<sub>A</sub> = x<sub>A</sub>P<sub>总</sub>，其中 x<sub>A</sub> = n<sub>A</sub>/n<sub>总</sub>。"
+        },
+        {
+          id: "01-b5", section: "基础概念题", type: "fill", knowledge: "分压与分体积",
+          prompt: "分压和分体积的定义条件分别是什么？",
+          answerText: "分压：相同 V、T；分体积：相同 p、T。",
+          explanation: "分压是假设组分单独占有整个混合气体容积，条件是相同 V 和 T；分体积是假设组分单独处于混合气体总压下，条件是相同 p 和 T。"
+        },
+        {
+          id: "01-b6", section: "基础概念题", type: "choice", knowledge: "临界温度",
+          prompt: "高于临界温度时，气体能否通过单纯加压液化？",
+          options: [["A", "能"], ["B", "不能"], ["C", "只要压力足够大就能"], ["D", "与温度无关"]],
+          answer: "B", answerText: "B. 不能",
+          explanation: "临界温度是气体能被液化的最高温度。高于临界温度时，无论怎样加压都不能液化。"
+        },
+        {
+          id: "01-b7", section: "基础概念题", type: "fill", knowledge: "沸腾条件",
+          prompt: "液体沸腾的条件是液体的蒸气压 ______ 外界压力。",
+          accepted: ["等于", "相等", "="], answerText: "等于",
+          explanation: "当液体蒸气压等于外界压力时，液体表面和内部同时气化，即发生沸腾。"
+        },
+        {
+          id: "01-b8", section: "基础概念题", type: "fill", knowledge: "水的相图",
+          prompt: "水的三相点温度和压力分别是多少？",
+          accepted: ["0.01", "610.6"], requireAllAccepted: true,
+          answerText: "0.01 °C；610.6 Pa。",
+          explanation: "水的三相点是冰、水、水蒸气三相共存的平衡点，条件为 0.01 °C 和 610.6 Pa。"
+        },
+        {
+          id: "01-c1", section: "公式计算题", type: "calc", knowledge: "理想气体状态方程",
+          prompt: "某气体在 300 K、100 kPa 下体积为 24.0 dm<sup>3</sup>。求该气体的物质的量。",
+          answerText: "0.963 mol", formula: "n = pV / RT",
+          explanation: "使用公式：n = pV / RT。<br>已知量：p = 100 kPa，V = 24.0 dm³，T = 300 K。<br>单位换算：使用 R = 8.31 kPa·dm³·mol⁻¹·K⁻¹，无需把 dm³ 换成 m³。<br>代入过程：n = (100 × 24.0) / (8.31 × 300) = 0.963 mol。<br>最终答案：0.963 mol。<br>易错提醒：kPa 与 dm³ 可以配套使用，但不能混用 Pa 与 dm³。"
+        },
+        {
+          id: "01-c2", section: "公式计算题", type: "calc", knowledge: "摩尔质量计算",
+          prompt: "某气体质量为 0.132 g，在 293 K、9.97×10<sup>4</sup> Pa 下体积为 0.190 dm<sup>3</sup>。求摩尔质量，并判断可能是哪种气体。",
+          answerText: "M ≈ 17.0 g·mol⁻¹，可能为 NH<sub>3</sub>。", formula: "M = mRT / pV",
+          explanation: "使用公式：由 pV = nRT、n = m/M，得 M = mRT / pV。<br>已知量：m = 0.132 g，R = 8.314 Pa·m³·mol⁻¹·K⁻¹，T = 293 K，p = 9.97×10⁴ Pa。<br>单位换算：V = 0.190 dm³ = 0.190×10⁻³ m³。<br>代入过程：M = (0.132×8.314×293)/(9.97×10⁴×0.190×10⁻³) ≈ 17.0 g·mol⁻¹。<br>最终答案：M ≈ 17.0 g·mol⁻¹，可能为 NH<sub>3</sub>。<br>易错提醒：这里 R 使用 Pa·m³，所以体积必须换成 m³。"
+        },
+        {
+          id: "01-c3", section: "公式计算题", type: "calc", knowledge: "分压计算",
+          prompt: "空气近似含 78% N<sub>2</sub>、21% O<sub>2</sub>。若总压为 1.00 atm，求 N<sub>2</sub> 和 O<sub>2</sub> 的分压。",
+          answerText: "N<sub>2</sub>：0.78 atm；O<sub>2</sub>：0.21 atm。", formula: "P_i = x_i P_total",
+          explanation: "使用公式：P<sub>i</sub> = x<sub>i</sub>P<sub>总</sub>。<br>已知量：x<sub>N2</sub> = 0.78，x<sub>O2</sub> = 0.21，P<sub>总</sub> = 1.00 atm。<br>单位换算：压力都用 atm，无需换算。<br>代入过程：P<sub>N2</sub> = 0.78×1.00 = 0.78 atm；P<sub>O2</sub> = 0.21×1.00 = 0.21 atm。<br>最终答案：N<sub>2</sub> 分压 0.78 atm，O<sub>2</sub> 分压 0.21 atm。<br>易错提醒：分压用摩尔分数乘总压，本题按体积分数近似摩尔分数。"
+        },
+        {
+          id: "01-c4", section: "公式计算题", type: "calc", knowledge: "潜水混合气分压",
+          prompt: "深海 90 m 处总压约为 10 atm。若呼吸混合气体含 2% O<sub>2</sub>、8% N<sub>2</sub>、90% He，求各气体分压。",
+          answerText: "O<sub>2</sub>：0.20 atm；N<sub>2</sub>：0.80 atm；He：9.0 atm。", formula: "P_i = x_i P_total",
+          explanation: "使用公式：P<sub>i</sub> = x<sub>i</sub>P<sub>总</sub>。<br>已知量：P<sub>总</sub> = 10 atm，x<sub>O2</sub> = 0.02，x<sub>N2</sub> = 0.08，x<sub>He</sub> = 0.90。<br>单位换算：压力统一为 atm，无需换算。<br>代入过程：P<sub>O2</sub> = 0.02×10 = 0.20 atm；P<sub>N2</sub> = 0.08×10 = 0.80 atm；P<sub>He</sub> = 0.90×10 = 9.0 atm。<br>最终答案：O<sub>2</sub> 为 0.20 atm，N<sub>2</sub> 为 0.80 atm，He 为 9.0 atm。<br>易错提醒：深处总压大，但氧气中毒和氮麻醉主要看各气体分压。"
+        },
+        {
+          id: "01-c5", section: "公式计算题", type: "calc", knowledge: "Clausius-Clapeyron 方程",
+          prompt: "已知某液体在 T<sub>1</sub> = 350 K 时蒸气压 p<sub>1</sub> = 40.0 kPa，摩尔蒸发热 ΔH<sub>vap</sub> = 35.0 kJ·mol⁻¹。求 T<sub>2</sub> = 370 K 时的蒸气压 p<sub>2</sub>。取 R = 8.314 J·mol⁻¹·K⁻¹。",
+          answerText: "p<sub>2</sub> ≈ 76.4 kPa。", formula: "lg(p2/p1) = ΔHvap/(2.303R) × (T2 - T1)/(T2T1)",
+          explanation: "使用公式：lg(p<sub>2</sub>/p<sub>1</sub>) = [ΔH<sub>vap</sub>/(2.303R)] × [(T<sub>2</sub>-T<sub>1</sub>)/(T<sub>2</sub>T<sub>1</sub>)]。<br>已知量：T<sub>1</sub> = 350 K，T<sub>2</sub> = 370 K，p<sub>1</sub> = 40.0 kPa，R = 8.314 J·mol⁻¹·K⁻¹。<br>单位换算：ΔH<sub>vap</sub> = 35.0 kJ·mol⁻¹ = 35000 J·mol⁻¹。<br>代入过程：lg(p<sub>2</sub>/40.0) = [35000/(2.303×8.314)] × [(370-350)/(370×350)] ≈ 0.282。<br>继续计算：p<sub>2</sub>/40.0 = 10<sup>0.282</sup> ≈ 1.91，所以 p<sub>2</sub> ≈ 76.4 kPa。<br>最终答案：p<sub>2</sub> ≈ 76.4 kPa。<br>易错提醒：ΔH 与 R 的单位必须一致；温度必须用 K。"
+        },
+        {
+          id: "01-j1", section: "判断题", type: "judge", knowledge: "理想气体模型",
+          prompt: "理想气体模型认为气体分子间不存在相互作用力，分子本身体积也可忽略。",
+          answer: true, answerText: "正确", explanation: "正确。理想气体的核心假设就是“无作用力、无体积”。"
+        },
+        {
+          id: "01-j2", section: "判断题", type: "judge", knowledge: "临界温度",
+          prompt: "对所有真实气体，只要压力足够大，就一定能在任意温度下液化。",
+          answer: false, answerText: "错误", explanation: "错误。高于临界温度时，无论怎样加压都不能液化。"
+        },
+        {
+          id: "01-j3", section: "判断题", type: "judge", knowledge: "气体温度单位",
+          prompt: "气体计算中，摄氏温度可以直接代入 pV = nRT。",
+          answer: false, answerText: "错误", explanation: "错误。气体状态方程必须使用热力学温度 K。"
+        },
+        {
+          id: "01-j4", section: "判断题", type: "judge", knowledge: "分压定律",
+          prompt: "在理想混合气体中，某组分分压等于该组分摩尔分数乘总压。",
+          answer: true, answerText: "正确", explanation: "正确。理想混合气体中 P<sub>i</sub> = x<sub>i</sub>P<sub>总</sub>。"
+        },
+        {
+          id: "01-j5", section: "判断题", type: "judge", knowledge: "分压与分体积易错点",
+          prompt: "对组分 A，总有 P<sub>A</sub>V<sub>A</sub> = n<sub>A</sub>RT。",
+          answer: false, answerText: "错误", explanation: "错误。混合气体中正确关系是 P<sub>A</sub>V<sub>总</sub> = P<sub>总</sub>V<sub>A</sub> = n<sub>A</sub>RT，不能把分压和分体积直接相乘。"
+        },
+        {
+          id: "01-j6", section: "判断题", type: "judge", knowledge: "饱和蒸气压",
+          prompt: "饱和蒸气压在温度恒定且气液共存时不随液体量改变。",
+          answer: true, answerText: "正确", explanation: "正确。饱和蒸气压在恒温且气液共存时为定值。"
+        },
+        {
+          id: "01-j7", section: "判断题", type: "judge", knowledge: "沸点与外压",
+          prompt: "水在高山上的沸点低于 100 °C。",
+          answer: true, answerText: "正确", explanation: "正确。高山大气压低，水蒸气压达到外压所需温度降低，所以沸点降低。"
+        },
+        {
+          id: "01-j8", section: "判断题", type: "judge", knowledge: "压缩系数 Z",
+          prompt: "Z = 1 时，该气体一定是真正的理想气体。",
+          answer: false, answerText: "错误", explanation: "错误。真实气体可能因吸引力效应和体积效应相互抵消而 Z = 1。"
+        },
+        {
+          id: "01-s1", section: "综合题", type: "essay", knowledge: "混合气体分压与分体积",
+          prompt: "现有 A、B 两种理想气体在同一容器中混合，温度为 T，总体积为 V，总压为 P<sub>总</sub>，物质的量分别为 n<sub>A</sub>、n<sub>B</sub>。<br>（1）写出 P<sub>A</sub> 与 P<sub>总</sub> 的关系。<br>（2）写出 V<sub>A</sub> 与 V<sub>总</sub> 的关系。<br>（3）判断 P<sub>A</sub>V<sub>A</sub> = n<sub>A</sub>RT、P<sub>A</sub>V<sub>总</sub> = n<sub>A</sub>RT、P<sub>总</sub>V<sub>A</sub> = n<sub>A</sub>RT 是否正确，并说明原因。",
+          answerText: "（1）P<sub>A</sub> = [n<sub>A</sub>/(n<sub>A</sub>+n<sub>B</sub>)]P<sub>总</sub>。<br>（2）V<sub>A</sub> = [n<sub>A</sub>/(n<sub>A</sub>+n<sub>B</sub>)]V<sub>总</sub>。<br>（3）P<sub>A</sub>V<sub>A</sub> = n<sub>A</sub>RT 错误；P<sub>A</sub>V<sub>总</sub> = n<sub>A</sub>RT 正确；P<sub>总</sub>V<sub>A</sub> = n<sub>A</sub>RT 正确。",
+          explanation: "分析逻辑：分压的定义是组分 A 单独占有整个混合气体容积时产生的压力，所以分压应配总体积。分体积的定义是组分 A 单独处于混合气体总压下所占体积，所以分体积应配总压。核心记忆：分压配总体积，分体积配总压。"
+        },
+        {
+          id: "01-s2", section: "综合题", type: "essay", knowledge: "液体气化与液化现象",
+          prompt: "根据本章内容解释以下现象：<br>（1）高压锅中水更容易把食物煮熟。<br>（2）蒸馏时要加入沸石或进行搅拌。<br>（3）家用液化气钢瓶有时仍然很重却不易点燃。",
+          answerText: "（1）高压锅内压力升高，水的沸点升高。<br>（2）沸石或搅拌提供气化中心，避免过热液体爆沸。<br>（3）剩余较多高级烷烃时，室温下不易气化，所以钢瓶仍重却不易点燃。",
+          explanation: "（1）高压锅内外界压力升高，水必须在更高温度下蒸气压才等于外压，因此沸点升高。<br>（2）液体可能形成过热液体，突然产生大量气泡导致爆沸；沸石或搅拌能引入小气泡，提供气化中心。<br>（3）液化气主要成分丙烷、丁烷减压后容易气化；若剩余 C<sub>5</sub>H<sub>12</sub>、C<sub>6</sub>H<sub>14</sub> 等较高级烷烃，它们室温下不易气化。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "02",
+      title: "02 第二章 溶液",
+      source: "02-quiz.md",
+      questions: [
+        {
+          id: "02-b1", section: "基础概念题", type: "fill", knowledge: "溶液定义",
+          prompt: "广义溶液是由两种或两种以上物质组成的 ______、______ 的分散体系。",
+          accepted: ["均匀", "稳定"], requireAllAccepted: true,
+          answerText: "均匀、稳定。",
+          explanation: "溶液的关键词是“均匀”和“稳定”：分散相均匀分布，并能稳定存在。"
+        },
+        {
+          id: "02-b2", section: "基础概念题", type: "choice", knowledge: "溶剂和溶质",
+          prompt: "两种液体互相溶解时，一般把哪一种称为溶剂？",
+          options: [["A", "摩尔质量大的"], ["B", "量多的"], ["C", "密度大的"], ["D", "沸点高的"]],
+          answer: "B", answerText: "B. 量多的",
+          explanation: "气体或固体溶于液体时，液体为溶剂；两种液体互溶时，通常量多者为溶剂，量少者为溶质。"
+        },
+        {
+          id: "02-b3", section: "基础概念题", type: "fill", knowledge: "质量摩尔浓度",
+          prompt: "质量摩尔浓度的分母是 ______，单位通常为 ______。",
+          accepted: ["溶剂", "mol"], requireAllAccepted: true,
+          answerText: "溶剂质量；mol·kg⁻¹。",
+          explanation: "质量摩尔浓度 m = 溶质物质的量 / 溶剂质量(kg)，因此分母不是溶液质量，也不是溶液体积。"
+        },
+        {
+          id: "02-b4", section: "基础概念题", type: "choice", knowledge: "物质的量浓度",
+          prompt: "下列浓度表示中，分母为“溶液体积”的是",
+          options: [["A", "质量分数"], ["B", "摩尔分数"], ["C", "质量摩尔浓度"], ["D", "物质的量浓度"]],
+          answer: "D", answerText: "D. 物质的量浓度",
+          explanation: "物质的量浓度 c = n / V<sub>溶液</sub>，分母是溶液体积，单位常用 mol/L 或 M。"
+        },
+        {
+          id: "02-b5", section: "基础概念题", type: "fill", knowledge: "溶解度影响因素",
+          prompt: "固体溶解度一般随温度升高而 ______，气体溶解度一般随温度升高而 ______。",
+          accepted: ["增大", "减小"], requireAllAccepted: true,
+          answerText: "增大；减小。",
+          explanation: "多数固体升温更易溶，少数例外；气体升温更易逸出，所以溶解度一般减小。"
+        },
+        {
+          id: "02-b6", section: "基础概念题", type: "choice", knowledge: "依数性",
+          prompt: "下列属于依数性的是",
+          options: [["A", "颜色"], ["B", "黏度"], ["C", "沸点升高"], ["D", "气味"]],
+          answer: "C", answerText: "C. 沸点升高",
+          explanation: "依数性包括蒸气压下降、沸点升高、凝固点降低和渗透压，核心是与粒子数有关。"
+        },
+        {
+          id: "02-b7", section: "基础概念题", type: "fill", knowledge: "渗透压",
+          prompt: "稀溶液的渗透压公式可写为 Π = ______。",
+          accepted: ["cRT", "crt"], answerText: "Π = cRT。",
+          explanation: "van't Hoff 渗透压公式为 ΠV = nRT，也可写成 Π = cRT。"
+        },
+        {
+          id: "02-b8", section: "基础概念题", type: "choice", knowledge: "丁铎尔效应",
+          prompt: "丁铎尔效应主要用于鉴别",
+          options: [["A", "真溶液和胶体"], ["B", "酸和碱"], ["C", "强电解质和弱电解质"], ["D", "饱和溶液和不饱和溶液"]],
+          answer: "A", answerText: "A. 真溶液和胶体",
+          explanation: "胶粒能明显散射光，形成可见光路；真溶液粒子太小，散射很弱。"
+        },
+        {
+          id: "02-c1", section: "公式计算题", type: "calc", knowledge: "质量分数",
+          prompt: "将 10.0 g NaCl 溶于 100.0 g 水中，求 NaCl 的质量分数。",
+          answerText: "9.1%。", formula: "ω = m(溶质) / m(溶液)",
+          explanation: "使用公式：ω = m<sub>溶质</sub> / m<sub>溶液</sub>。<br>已知量：m(NaCl)=10.0 g，m(水)=100.0 g。<br>单位换算：质量单位一致，无需换算。<br>代入过程：ω = 10.0/(10.0+100.0)×100% = 9.09% ≈ 9.1%。<br>最终答案：9.1%。<br>易错提醒：分母是溶液质量，不是水的质量。"
+        },
+        {
+          id: "02-c2", section: "公式计算题", type: "calc", knowledge: "质量摩尔浓度",
+          prompt: "将 10.0 g NaCl 溶于 100.0 g 水中，已知 M(NaCl)=58.4 g·mol⁻¹，求 NaCl 的质量摩尔浓度。",
+          answerText: "1.71 mol·kg⁻¹。", formula: "m = n(溶质) / m(溶剂, kg)",
+          explanation: "使用公式：m = n<sub>溶质</sub> / m<sub>溶剂</sub>(kg)。<br>已知量：m(NaCl)=10.0 g，M(NaCl)=58.4 g·mol⁻¹，m(水)=100.0 g。<br>单位换算：100.0 g 水 = 0.1000 kg 水。<br>代入过程：n(NaCl)=10.0/58.4=0.171 mol；m=0.171/0.1000=1.71 mol·kg⁻¹。<br>最终答案：1.71 mol·kg⁻¹。<br>易错提醒：质量摩尔浓度分母是溶剂质量 kg。"
+        },
+        {
+          id: "02-c3", section: "公式计算题", type: "calc", knowledge: "Raoult 定律",
+          prompt: "20.0 °C 时水的饱和蒸气压为 2.34 kPa。将 17.1 g 蔗糖 (M=342 g·mol⁻¹) 溶于 100.0 g 水中，求溶液蒸气压。",
+          answerText: "约 2.32 kPa。", formula: "p = p0 x1",
+          explanation: "使用公式：Raoult 定律 p = p⁰x<sub>1</sub>，x<sub>1</sub> 为溶剂摩尔分数。<br>已知量：p⁰=2.34 kPa，m(蔗糖)=17.1 g，M(蔗糖)=342 g·mol⁻¹，m(水)=100.0 g。<br>单位换算：水的摩尔质量取 18.0 g·mol⁻¹。<br>代入过程：n(蔗糖)=17.1/342=0.0500 mol；n(H<sub>2</sub>O)=100.0/18.0=5.56 mol；x<sub>H2O</sub>=5.56/(5.56+0.0500)=0.991；p=2.34×0.991=2.32 kPa。<br>最终答案：约 2.32 kPa。<br>易错提醒：p=p⁰x<sub>1</sub> 中 x<sub>1</sub> 是溶剂摩尔分数，不是溶质摩尔分数。"
+        },
+        {
+          id: "02-c4", section: "公式计算题", type: "calc", knowledge: "凝固点降低",
+          prompt: "将 2.50 g 蔗糖 (M=342 g·mol⁻¹) 溶于 253.0 g 水；另将 5.20 g 未知非电解质溶于 1000 g 水。两溶液在同一温度结冰，求未知物摩尔质量。",
+          answerText: "180 g·mol⁻¹。", formula: "ΔTf = Kf m",
+          explanation: "使用公式：ΔT<sub>f</sub>=K<sub>f</sub>m。两溶液同温结冰，且溶剂相同，所以质量摩尔浓度相同。<br>已知量：蔗糖 2.50 g，M=342 g·mol⁻¹，水 253.0 g；未知物 5.20 g，水 1000 g。<br>单位换算：253.0 g=0.2530 kg，1000 g=1.000 kg。<br>代入过程：(2.50/342)/0.2530 = (5.20/M)/1.000。<br>解得：M ≈ 180 g·mol⁻¹。<br>最终答案：180 g·mol⁻¹。<br>易错提醒：同温结冰代表质量摩尔浓度相同，不是质量相同。"
+        },
+        {
+          id: "02-c5", section: "公式计算题", type: "calc", knowledge: "凝固点降低与渗透压",
+          prompt: "人类血浆凝固点为 272.59 K，纯水凝固点取 273.15 K，水的 K<sub>f</sub>=1.86 K·kg·mol⁻¹。求血浆的质量摩尔浓度，并估算 310 K 时血浆渗透压。稀水溶液取 c≈m，R=8.31 kPa·dm³·mol⁻¹·K⁻¹。",
+          answerText: "m = 0.301 mol·kg⁻¹；Π ≈ 775 kPa。", formula: "ΔTf = Kf m；Π = cRT",
+          explanation: "使用公式：ΔT<sub>f</sub>=K<sub>f</sub>m，Π=cRT。<br>已知量：T<sub>f,水</sub>=273.15 K，T<sub>f,血浆</sub>=272.59 K，K<sub>f</sub>=1.86 K·kg·mol⁻¹，T=310 K。<br>单位换算：稀水溶液取 c≈m=0.301 mol·dm⁻³。<br>代入过程：ΔT<sub>f</sub>=273.15-272.59=0.56 K；m=0.56/1.86=0.301 mol·kg⁻¹；Π=0.301×8.31×310=775 kPa。<br>最终答案：m=0.301 mol·kg⁻¹，Π≈775 kPa。<br>易错提醒：只有稀水溶液才可近似 c≈m。"
+        },
+        {
+          id: "02-j1", section: "判断题", type: "judge", knowledge: "质量分数",
+          prompt: "质量分数的分母是溶剂质量。",
+          answer: false, answerText: "错误",
+          explanation: "错误。质量分数的分母是溶液质量，即溶质质量加溶剂质量。"
+        },
+        {
+          id: "02-j2", section: "判断题", type: "judge", knowledge: "物质的量浓度",
+          prompt: "物质的量浓度的单位可写作 mol/L 或 M。",
+          answer: true, answerText: "正确",
+          explanation: "正确。物质的量浓度 c 的常用单位是 mol/L，也常简写为 M。"
+        },
+        {
+          id: "02-j3", section: "判断题", type: "judge", knowledge: "质量摩尔浓度",
+          prompt: "质量摩尔浓度不直接受温度引起的体积变化影响。",
+          answer: true, answerText: "正确",
+          explanation: "正确。质量摩尔浓度分母是溶剂质量，质量不随温度导致的体积变化而改变。"
+        },
+        {
+          id: "02-j4", section: "判断题", type: "judge", knowledge: "固体溶解度",
+          prompt: "固体溶解度受压力影响显著，所以描述固体溶解度必须同时注明温度和压力。",
+          answer: false, answerText: "错误",
+          explanation: "错误。固体溶解度受压力影响极小，一般只需注明温度。"
+        },
+        {
+          id: "02-j5", section: "判断题", type: "judge", knowledge: "气体溶解度",
+          prompt: "气体溶解度一般随压力增大而增大。",
+          answer: true, answerText: "正确",
+          explanation: "正确。气体溶解度一般随压力增大而增大，随温度升高而减小。"
+        },
+        {
+          id: "02-j6", section: "判断题", type: "judge", knowledge: "依数性",
+          prompt: "非电解质稀溶液的依数性只与溶质粒子数有关，与溶质本性无关。",
+          answer: true, answerText: "正确",
+          explanation: "正确。依数性的核心就是与粒子数或浓度有关，而与溶质本性无关。"
+        },
+        {
+          id: "02-j7", section: "判断题", type: "judge", knowledge: "活度",
+          prompt: "强电解质在水中完全电离，因此不需要活度概念。",
+          answer: false, answerText: "错误",
+          explanation: "错误。强电解质虽完全电离，但离子间作用显著，实际浓度不能准确反映有效作用，需要活度。"
+        },
+        {
+          id: "02-j8", section: "判断题", type: "judge", knowledge: "丁铎尔效应",
+          prompt: "胶体的丁铎尔效应来自胶粒对光的散射。",
+          answer: true, answerText: "正确",
+          explanation: "正确。丁铎尔效应是胶粒散射光形成可见光路。"
+        },
+        {
+          id: "02-s1", section: "综合题", type: "essay", knowledge: "浓度表示法",
+          prompt: "比较质量分数、质量摩尔浓度、物质的量浓度三种浓度表示方法：分别说明定义、分母是什么、是否受温度体积变化影响，以及常见考法。",
+          answerText: "质量分数：溶质质量/溶液质量；质量摩尔浓度：溶质物质的量/溶剂质量 kg；物质的量浓度：溶质物质的量/溶液体积。",
+          explanation: "质量分数 ω=m<sub>溶质</sub>/m<sub>溶液</sub>，分母是溶液质量，无量纲，常考“10 g 溶质加 100 g 水不是 10%”。<br>质量摩尔浓度 m=n<sub>溶质</sub>/m<sub>溶剂</sub>(kg)，分母是溶剂质量，不受温度导致的体积变化影响，依数性计算常用。<br>物质的量浓度 c=n<sub>溶质</sub>/V<sub>溶液</sub>，分母是溶液体积，会受温度影响，常用于配制溶液和渗透压计算。"
+        },
+        {
+          id: "02-s2", section: "综合题", type: "essay", knowledge: "溶解度、依数性与胶体",
+          prompt: "用本章知识解释以下现象：<br>（1）汽水瓶打开时有大量气泡冒出；<br>（2）汽车防冻液可降低结冰温度；<br>（3）用激光笔照射 Fe(OH)<sub>3</sub> 胶体可看到光路。",
+          answerText: "（1）开瓶后压力降低，CO<sub>2</sub> 溶解度下降。<br>（2）防冻液使凝固点降低。<br>（3）Fe(OH)<sub>3</sub> 胶体发生丁铎尔效应。",
+          explanation: "（1）汽水中 CO<sub>2</sub> 是气体溶质，气体溶解度随压力增大而增大；开瓶后压力降低，CO<sub>2</sub> 溶解度下降，于是大量气泡逸出。<br>（2）防冻液含乙二醇等非电解质溶质，溶液发生凝固点降低，浓度越大凝固点越低。<br>（3）Fe(OH)<sub>3</sub> 胶体中胶粒能散射光，激光通过时从侧面看到浑浊发亮的光柱，即丁铎尔效应。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "03",
+      title: "03 第三章 化学热力学-反应的方向",
+      source: "03-quiz.md",
+      questions: [
+        {
+          id: "03-b1", section: "基础概念题", type: "fill", knowledge: "热与功符号",
+          prompt: "本章符号约定中，体系吸热 Q 为 ______，体系放热 Q 为 ______。",
+          accepted: ["正", "负"], requireAllAccepted: true,
+          answerText: "正；负。",
+          explanation: "本章规定体系得到能量为正，失去能量为负。因此体系吸热 Q>0，体系放热 Q<0。"
+        },
+        {
+          id: "03-b2", section: "基础概念题", type: "choice", knowledge: "状态函数",
+          prompt: "下列属于状态函数的是",
+          options: [["A", "Q"], ["B", "W"], ["C", "H"], ["D", "途径"]],
+          answer: "C", answerText: "C. H",
+          explanation: "H 是焓，是状态函数；Q 和 W 是过程量，与途径有关。"
+        },
+        {
+          id: "03-b3", section: "基础概念题", type: "fill", knowledge: "体系类型",
+          prompt: "封闭体系与环境之间可以交换 ______，但不交换 ______。",
+          accepted: ["能量", "物质"], requireAllAccepted: true,
+          answerText: "能量；物质。",
+          explanation: "封闭体系没有物质交换，但可以通过热或功与环境交换能量。"
+        },
+        {
+          id: "03-b4", section: "基础概念题", type: "choice", knowledge: "恒压热效应",
+          prompt: "恒压且只做体积功时，体系吸收的热量等于",
+          options: [["A", "ΔU"], ["B", "ΔH"], ["C", "ΔS"], ["D", "ΔG"]],
+          answer: "B", answerText: "B. ΔH",
+          explanation: "恒压且只做体积功时，Q<sub>p</sub>=ΔH；恒容且无其他功时，Q<sub>V</sub>=ΔU。"
+        },
+        {
+          id: "03-b5", section: "基础概念题", type: "fill", knowledge: "标准生成焓",
+          prompt: "稳定态单质的标准生成焓为 ______。",
+          accepted: ["0", "零"], answerText: "0。",
+          explanation: "标准生成焓定义以稳定态单质为基准，所以稳定态单质的标准生成焓规定为 0。"
+        },
+        {
+          id: "03-b6", section: "基础概念题", type: "choice", knowledge: "熵变判断",
+          prompt: "气体分子数增加的反应，一般 ΔS",
+          options: [["A", "大于 0"], ["B", "小于 0"], ["C", "等于 0"], ["D", "无法判断且没有规律"]],
+          answer: "A", answerText: "A. 大于 0",
+          explanation: "气体分子数增加通常意味着微观状态数增加、混乱度增大，因此 ΔS 通常大于 0。"
+        },
+        {
+          id: "03-b7", section: "基础概念题", type: "fill", knowledge: "Gibbs-Helmholtz 方程",
+          prompt: "等温过程 Gibbs-Helmholtz 方程为 ΔG = ______。",
+          accepted: ["ΔH-TΔS", "dh-tds", "H-TS"], answerText: "ΔH - TΔS。",
+          explanation: "等温过程、封闭体系下，Gibbs 自由能变可写为 ΔG=ΔH-TΔS。"
+        },
+        {
+          id: "03-b8", section: "基础概念题", type: "choice", knowledge: "Gibbs 判据",
+          prompt: "当 ΔG < 0 时，反应在该条件下",
+          options: [["A", "正向自发"], ["B", "正向非自发"], ["C", "平衡"], ["D", "一定瞬间完成"]],
+          answer: "A", answerText: "A. 正向自发",
+          explanation: "ΔG<0 表示正向自发；但热力学只说明可能性，不说明反应速率。"
+        },
+        {
+          id: "03-c1", section: "公式计算题", type: "calc", knowledge: "热力学第一定律",
+          prompt: "某体系由 A 态到 B 态，沿途径 I 放热 100 J，环境对体系做功 50 J。求 ΔU。",
+          answerText: "-50 J。", formula: "ΔU = Q + W",
+          explanation: "使用公式：ΔU = Q + W。<br>已知量：体系放热 100 J，所以 Q=-100 J；环境对体系做功 50 J，所以 W=+50 J。<br>单位换算：均为 J，无需换算。<br>代入过程：ΔU=-100+50=-50 J。<br>最终答案：-50 J。<br>易错提醒：放热 Q<0，环境对体系做功 W>0。"
+        },
+        {
+          id: "03-c2", section: "公式计算题", type: "calc", knowledge: "ΔH 与 ΔU",
+          prompt: "反应 H<sub>2</sub>(g)+0.5O<sub>2</sub>(g)=H<sub>2</sub>O(g) 在 373 K 下 ΔH=-241.8 kJ·mol⁻¹。求 ΔU。取 R=8.31×10⁻³ kJ·mol⁻¹·K⁻¹。",
+          answerText: "约 -240 kJ·mol⁻¹。", formula: "ΔH = ΔU + ΔngRT",
+          explanation: "使用公式：ΔH=ΔU+Δn<sub>g</sub>RT。<br>已知量：ΔH=-241.8 kJ·mol⁻¹，T=373 K，R=8.31×10⁻³ kJ·mol⁻¹·K⁻¹。<br>单位换算：R 已用 kJ 单位。<br>代入过程：Δn<sub>g</sub>=1-(1+0.5)=-0.5；ΔU=ΔH-Δn<sub>g</sub>RT=-241.8-[(-0.5)(8.31×10⁻³)(373)]≈-240.3 kJ·mol⁻¹。<br>最终答案：约 -240 kJ·mol⁻¹。<br>易错提醒：Δn<sub>g</sub> 只统计气体。"
+        },
+        {
+          id: "03-c3", section: "公式计算题", type: "calc", knowledge: "盖斯定律",
+          prompt: "已知 C(石墨)+O<sub>2</sub>(g)=CO<sub>2</sub>(g)，ΔH=-393.5 kJ·mol⁻¹；CO(g)+0.5O<sub>2</sub>(g)=CO<sub>2</sub>(g)，ΔH=-283.0 kJ·mol⁻¹。求 C(石墨)+0.5O<sub>2</sub>(g)=CO(g) 的 ΔH。",
+          answerText: "-110.5 kJ·mol⁻¹。", formula: "ΔH目标 = ΔH1 - ΔH2",
+          explanation: "使用方法：盖斯定律。目标反应 = 反应 1 - 反应 2。<br>已知量：ΔH<sub>1</sub>=-393.5 kJ·mol⁻¹，ΔH<sub>2</sub>=-283.0 kJ·mol⁻¹。<br>单位换算：单位相同，无需换算。<br>代入过程：ΔH<sub>目标</sub>=-393.5-(-283.0)=-110.5 kJ·mol⁻¹。<br>最终答案：-110.5 kJ·mol⁻¹。<br>易错提醒：减去一个反应等价于加上它的逆反应，焓变要变号。"
+        },
+        {
+          id: "03-c4", section: "公式计算题", type: "calc", knowledge: "熵变计算",
+          prompt: "已知反应 CaCO<sub>3</sub>(s)=CaO(s)+CO<sub>2</sub>(g)，且 S°(CaCO<sub>3</sub>)=91.7，S°(CaO)=38.1，S°(CO<sub>2</sub>)=213.8，单位均为 J·mol⁻¹·K⁻¹。求 ΔS°。",
+          answerText: "160.2 J·mol⁻¹·K⁻¹。", formula: "ΔS° = ΣνS°(生成物) - ΣνS°(反应物)",
+          explanation: "使用公式：ΔS°=ΣνS°(生成物)-ΣνS°(反应物)。<br>已知量：S°(CaCO<sub>3</sub>)=91.7，S°(CaO)=38.1，S°(CO<sub>2</sub>)=213.8。<br>单位换算：均为 J·mol⁻¹·K⁻¹，无需换算。<br>代入过程：ΔS°=(38.1+213.8)-91.7=160.2 J·mol⁻¹·K⁻¹。<br>最终答案：160.2 J·mol⁻¹·K⁻¹。<br>易错提醒：计算 ΔG 时要把 J 换成 kJ。"
+        },
+        {
+          id: "03-c5", section: "公式计算题", type: "calc", knowledge: "转变温度",
+          prompt: "某反应 ΔH°=+182.6 kJ·mol⁻¹，ΔS°=+0.0248 kJ·mol⁻¹·K⁻¹。求转变温度 T<sub>转</sub>，并判断低温、高温下自发性。",
+          answerText: "T<sub>转</sub>≈7.36×10³ K；低温非自发，高温自发。", formula: "T转 = ΔH° / ΔS°",
+          explanation: "使用公式：令 ΔG°=0，则 T<sub>转</sub>=ΔH°/ΔS°。<br>已知量：ΔH°=+182.6 kJ·mol⁻¹，ΔS°=+0.0248 kJ·mol⁻¹·K⁻¹。<br>单位换算：两者都用 kJ，单位一致。<br>代入过程：T<sub>转</sub>=182.6/0.0248=7363 K。<br>判断：ΔH>0、ΔS>0，低温时 ΔG>0 正向非自发；高温时 TΔS 项占优，ΔG<0 正向自发。<br>最终答案：T<sub>转</sub>≈7.36×10³ K；低温非自发，高温自发。<br>易错提醒：ΔH 和 ΔS 单位必须一致。"
+        },
+        {
+          id: "03-j1", section: "判断题", type: "judge", knowledge: "热和功",
+          prompt: "热和功只存在于变化过程中，不是状态函数。",
+          answer: true, answerText: "正确",
+          explanation: "正确。Q 和 W 与途径有关，只在过程中发生。"
+        },
+        {
+          id: "03-j2", section: "判断题", type: "judge", knowledge: "孤立体系",
+          prompt: "孤立体系既不与环境交换物质，也不与环境交换能量。",
+          answer: true, answerText: "正确",
+          explanation: "正确。这是孤立体系的定义。"
+        },
+        {
+          id: "03-j3", section: "判断题", type: "judge", knowledge: "可逆过程",
+          prompt: "可逆过程是真实过程，很容易在实验中完全实现。",
+          answer: false, answerText: "错误",
+          explanation: "错误。可逆过程是理想化极限过程，真实过程只能近似。"
+        },
+        {
+          id: "03-j4", section: "判断题", type: "judge", knowledge: "恒容热效应",
+          prompt: "恒容且无其他功时，Q<sub>V</sub>=ΔU。",
+          answer: true, answerText: "正确",
+          explanation: "正确。恒容时 ΔV=0，无其他功则 W=0，所以 Q<sub>V</sub>=ΔU。"
+        },
+        {
+          id: "03-j5", section: "判断题", type: "judge", knowledge: "热化学方程式",
+          prompt: "反应式反过来写时，ΔH 的数值和符号都不变。",
+          answer: false, answerText: "错误",
+          explanation: "错误。反应逆写时，ΔH 符号改变。"
+        },
+        {
+          id: "03-j6", section: "判断题", type: "judge", knowledge: "键焓",
+          prompt: "键焓越大，断开该键所需吸收的热量越多。",
+          answer: true, answerText: "正确",
+          explanation: "正确。键焓越大，键越强，断键越需要吸热。"
+        },
+        {
+          id: "03-j7", section: "判断题", type: "judge", knowledge: "熵增原理",
+          prompt: "熵增原理可直接写作：封闭体系 ΔS<sub>体系</sub>>0 必自发。",
+          answer: false, answerText: "错误",
+          explanation: "错误。熵增原理直接适用于孤立体系；封闭体系不能只看体系熵。"
+        },
+        {
+          id: "03-j8", section: "判断题", type: "judge", knowledge: "Gibbs 判据",
+          prompt: "ΔH<0、ΔS>0 的反应在任何温度下 ΔG<0。",
+          answer: true, answerText: "正确",
+          explanation: "正确。ΔG=ΔH-TΔS，ΔH<0 且 ΔS>0 时，两项都使 ΔG 为负。"
+        },
+        {
+          id: "03-s1", section: "综合题", type: "essay", knowledge: "状态函数与反应热",
+          prompt: "比较 ΔU、ΔH、Q、W 的区别：哪些是状态函数，哪些与途径有关？在恒容和恒压条件下分别如何联系反应热？",
+          answerText: "ΔU、ΔH 是状态函数变化；Q、W 是过程量。恒容无其他功时 Q<sub>V</sub>=ΔU；恒压只做体积功时 Q<sub>p</sub>=ΔH。",
+          explanation: "ΔU 和 ΔH 是状态函数的变化，只与始末态有关；Q 和 W 是过程量，与途径有关。恒容、无其他功时，体系不做体积功，Q<sub>V</sub>=ΔU。恒压、只做体积功时，Q<sub>p</sub>=ΔH。对理想气体反应，还有 Q<sub>p</sub>=Q<sub>V</sub>+Δn<sub>g</sub>RT。"
+        },
+        {
+          id: "03-s2", section: "综合题", type: "essay", knowledge: "ΔH、ΔS 与自发性",
+          prompt: "结合 ΔG=ΔH-TΔS，总结四种 ΔH、ΔS 符号组合对反应自发性的影响，并各说明一个典型含义。",
+          answerText: "ΔH<0、ΔS>0：任意温度自发；ΔH>0、ΔS<0：任意温度非自发；ΔH<0、ΔS<0：低温自发；ΔH>0、ΔS>0：高温自发。",
+          explanation: "由 ΔG=ΔH-TΔS 可知：<br>（1）ΔH<0、ΔS>0：放热且熵增，任意温度 ΔG<0，正向自发。<br>（2）ΔH>0、ΔS<0：吸热且熵减，任意温度 ΔG>0，正向非自发。<br>（3）ΔH<0、ΔS<0：低温时放热项有利，正向自发；高温时 -TΔS 为正且占优，正向非自发，如合成氨低温有利。<br>（4）ΔH>0、ΔS>0：低温非自发，高温时熵增项占优，正向自发，如 N<sub>2</sub>+O<sub>2</sub>→2NO 需高温。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "04",
+      title: "04 第四章 化学反应的限度",
+      source: "chemistry_quiz/04-quiz.md",
+      questions: [
+        {
+          id: "04-b1", section: "基础概念题", type: "fill", knowledge: "动态平衡",
+          prompt: "化学平衡是指可逆反应中 v<sub>正</sub> 与 v<sub>逆</sub> ______，各组分浓度或分压保持不变的状态。",
+          accepted: ["相等", "相同", "相等的"], answerText: "相等。",
+          explanation: "平衡是动态平衡，正逆反应仍在进行，只是速率相等，所以宏观组成保持不变。"
+        },
+        {
+          id: "04-b2", section: "基础概念题", type: "choice", knowledge: "浓度平衡常数",
+          prompt: "对反应 aA+bB ⇌ cC+dD，浓度平衡常数 K<sub>c</sub> 的正确形式是",
+          options: [["A", "[A]<sup>a</sup>[B]<sup>b</sup> / [C]<sup>c</sup>[D]<sup>d</sup>"], ["B", "[C]<sup>c</sup>[D]<sup>d</sup> / [A]<sup>a</sup>[B]<sup>b</sup>"], ["C", "[C][D] / [A][B]"], ["D", "([A]+[B]) / ([C]+[D])"]],
+          answer: "B", answerText: "B. [C]<sup>c</sup>[D]<sup>d</sup> / [A]<sup>a</sup>[B]<sup>b</sup>",
+          explanation: "平衡常数表达式中，生成物写在分子，反应物写在分母，指数等于反应方程式中的计量数。"
+        },
+        {
+          id: "04-b3", section: "基础概念题", type: "fill", knowledge: "标准压力",
+          prompt: "标准压力 p<sup>θ</sup> 在本章中取 ______ kPa，也等于 1 bar。",
+          accepted: ["100", "一百"], answerText: "100 kPa。",
+          explanation: "材料中给出 p<sup>θ</sup>=100 kPa=1 bar；标准平衡常数使用相对分压 p/p<sup>θ</sup>。"
+        },
+        {
+          id: "04-b4", section: "基础概念题", type: "choice", knowledge: "平衡常数表达式",
+          prompt: "下列物质在写平衡常数表达式时通常不写入的是",
+          options: [["A", "CO(g)"], ["B", "H<sup>+</sup>(aq)"], ["C", "Fe(s)"], ["D", "NO<sub>2</sub>(g)"]],
+          answer: "C", answerText: "C. Fe(s)",
+          explanation: "纯固体和纯液体的活度视为常数，不写入平衡常数和反应商表达式。"
+        },
+        {
+          id: "04-b5", section: "基础概念题", type: "fill", knowledge: "反应商",
+          prompt: "非标准态下判断反应方向时，用反应商 Q 与 ______ 比较。",
+          accepted: ["K", "Kθ", "K^θ", "标准平衡常数", "平衡常数"], answerText: "K<sup>θ</sup>。",
+          explanation: "非标准态方向由 Q/K<sup>θ</sup> 判断；Q<K<sup>θ</sup> 时正向自发，Q>K<sup>θ</sup> 时正向非自发。"
+        },
+        {
+          id: "04-b6", section: "基础概念题", type: "choice", knowledge: "Q/K 判据",
+          prompt: "若 Q/K<sup>θ</sup> < 1，则该条件下反应",
+          options: [["A", "正向自发"], ["B", "正向非自发"], ["C", "已达到平衡"], ["D", "无法判断"]],
+          answer: "A", answerText: "A. 正向自发",
+          explanation: "ΔG<sub>T</sub>=2.30RT lg(Q/K<sup>θ</sup>)。当 Q/K<sup>θ</sup><1 时，lg(Q/K<sup>θ</sup>)<0，所以 ΔG<sub>T</sub><0，正向自发。"
+        },
+        {
+          id: "04-b7", section: "基础概念题", type: "fill", knowledge: "反应式与 K",
+          prompt: "若某反应式反向书写，则新反应的平衡常数等于原平衡常数的 ______。",
+          accepted: ["倒数", " reciprocal", "1/K", "1／K"], answerText: "倒数，即 1/K。",
+          explanation: "反应倒写时生成物和反应物互换，平衡常数表达式随之取倒数。"
+        },
+        {
+          id: "04-b8", section: "基础概念题", type: "choice", knowledge: "温度与平衡常数",
+          prompt: "温度升高时，吸热反应的标准平衡常数通常",
+          options: [["A", "增大"], ["B", "减小"], ["C", "不变"], ["D", "一定等于 1"]],
+          answer: "A", answerText: "A. 增大",
+          explanation: "升高温度时，平衡向吸热方向移动；若正向为吸热反应，则升温使生成物相对增加，K<sup>θ</sup> 增大。"
+        },
+        {
+          id: "04-c1", section: "公式计算题", type: "calc", knowledge: "Kc 计算",
+          prompt: "已知 H<sub>2</sub>(g)+I<sub>2</sub>(g) ⇌ 2HI(g) 在某温度下平衡浓度为 [H<sub>2</sub>]=0.00300 mol·dm⁻³，[I<sub>2</sub>]=0.00200 mol·dm⁻³，[HI]=0.0180 mol·dm⁻³。求 K<sub>c</sub>。",
+          answerText: "K<sub>c</sub>=54.0。", formula: "Kc = [HI]² / ([H₂][I₂])",
+          explanation: "使用公式：K<sub>c</sub>=[HI]<sup>2</sup>/([H<sub>2</sub>][I<sub>2</sub>])。<br>已知量：[HI]=0.0180 mol·dm⁻³，[H<sub>2</sub>]=0.00300 mol·dm⁻³，[I<sub>2</sub>]=0.00200 mol·dm⁻³。<br>单位换算：浓度单位一致，无需换算。<br>代入过程：K<sub>c</sub>=(0.0180)<sup>2</sup>/[(0.00300)(0.00200)]=54.0。<br>最终答案：K<sub>c</sub>=54.0。<br>易错提醒：K 必须用平衡浓度，不能用起始浓度。"
+        },
+        {
+          id: "04-c2", section: "公式计算题", type: "calc", knowledge: "Kp 与 Kc",
+          prompt: "对理想气体反应 N<sub>2</sub>(g)+3H<sub>2</sub>(g) ⇌ 2NH<sub>3</sub>(g)，若 K<sub>c</sub>=2.00×10²，T=500 K，取 R=8.31 kPa·dm³·mol⁻¹·K⁻¹，求 K<sub>p</sub>。",
+          answerText: "K<sub>p</sub>≈1.16×10⁻⁵。", formula: "Kp = Kc(RT)^Δng",
+          explanation: "使用公式：K<sub>p</sub>=K<sub>c</sub>(RT)<sup>Δn<sub>g</sub></sup>。<br>已知量：K<sub>c</sub>=2.00×10²，T=500 K，R=8.31 kPa·dm³·mol⁻¹·K⁻¹。<br>单位换算：R 与压力、体积单位配套。<br>代入过程：Δn<sub>g</sub>=2-(1+3)=-2，RT=8.31×500=4155；K<sub>p</sub>=2.00×10²×(4155)<sup>-2</sup>=1.16×10⁻⁵。<br>最终答案：K<sub>p</sub>≈1.16×10⁻⁵。<br>易错提醒：Δn<sub>g</sub>只统计气体，且本题指数是 -2。"
+        },
+        {
+          id: "04-c3", section: "公式计算题", type: "calc", knowledge: "ΔG 与 K",
+          prompt: "某反应在 298 K 时 ΔG<sub>298</sub><sup>θ</sup>=40.0 kJ·mol⁻¹。求 K<sup>θ</sup>。取 R=8.31 J·mol⁻¹·K⁻¹。",
+          answerText: "K<sup>θ</sup>≈9.5×10⁻⁸。", formula: "ΔGθ = -2.30RT lg Kθ",
+          explanation: "使用公式：lgK<sup>θ</sup>=-ΔG<sup>θ</sup>/(2.30RT)。<br>已知量：ΔG<sup>θ</sup>=40.0 kJ·mol⁻¹，T=298 K，R=8.31 J·mol⁻¹·K⁻¹。<br>单位换算：40.0 kJ·mol⁻¹=4.00×10⁴ J·mol⁻¹。<br>代入过程：lgK<sup>θ</sup>=-(4.00×10⁴)/(2.30×8.31×298)=-7.02；K<sup>θ</sup>=10<sup>-7.02</sup>=9.5×10⁻⁸。<br>最终答案：K<sup>θ</sup>≈9.5×10⁻⁸。<br>易错提醒：这里使用 lg，不是 ln；能量单位必须和 R 统一。"
+        },
+        {
+          id: "04-c4", section: "公式计算题", type: "calc", knowledge: "反应商与方向",
+          prompt: "2000 ℃ 时，N<sub>2</sub>(g)+O<sub>2</sub>(g) ⇌ 2NO(g) 的 K<sub>p</sub><sup>θ</sup>=9.8×10⁻²。若 p<sub>NO</sub>=1.00 kPa，p<sub>N2</sub>=82.1 kPa，p<sub>O2</sub>=82.1 kPa，p<sup>θ</sup>=100 kPa，求 Q<sub>p</sub>，并判断反应方向。",
+          answerText: "Q<sub>p</sub>=1.48×10⁻⁴，Q/K<1，正向自发。", formula: "Qp = (pNO/pθ)² / [(pN₂/pθ)(pO₂/pθ)]",
+          explanation: "使用公式：Q<sub>p</sub>=(p<sub>NO</sub>/p<sup>θ</sup>)<sup>2</sup>/[(p<sub>N2</sub>/p<sup>θ</sup>)(p<sub>O2</sub>/p<sup>θ</sup>)]。<br>已知量：p<sub>NO</sub>/p<sup>θ</sup>=1.00/100=0.0100，p<sub>N2</sub>/p<sup>θ</sup>=p<sub>O2</sub>/p<sup>θ</sup>=82.1/100=0.821。<br>单位换算：均转为相对分压。<br>代入过程：Q<sub>p</sub>=(0.0100)<sup>2</sup>/[(0.821)(0.821)]=1.48×10⁻⁴。Q<sub>p</sub>/K<sub>p</sub><sup>θ</sup>=1.48×10⁻⁴/(9.8×10⁻²)<1。<br>最终答案：Q<sub>p</sub>=1.48×10⁻⁴，反应正向自发。<br>易错提醒：标准平衡常数和反应商都要用相对分压。"
+        },
+        {
+          id: "04-c5", section: "公式计算题", type: "calc", knowledge: "多重平衡",
+          prompt: "在 823 K 时，反应(1) CO<sub>2</sub>(g)+H<sub>2</sub>(g) ⇌ CO(g)+H<sub>2</sub>O(g)，K<sub>p1</sub>=0.14；反应(2) CoO(s)+H<sub>2</sub>(g) ⇌ Co(s)+H<sub>2</sub>O(g)，K<sub>p2</sub>=67。求反应(3) CoO(s)+CO(g) ⇌ Co(s)+CO<sub>2</sub>(g) 的 K<sub>p3</sub>。",
+          answerText: "K<sub>p3</sub>=4.8×10²。", formula: "K3 = K2 / K1",
+          explanation: "使用关系：反应(3)=反应(2)-反应(1)，所以 K<sub>p3</sub>=K<sub>p2</sub>/K<sub>p1</sub>。<br>已知量：K<sub>p1</sub>=0.14，K<sub>p2</sub>=67。<br>单位换算：平衡常数直接组合，无需换算。<br>代入过程：K<sub>p3</sub>=67/0.14=4.8×10²。<br>最终答案：K<sub>p3</sub>=4.8×10²。<br>易错提醒：反应式相减对应平衡常数相除，不是相减。"
+        },
+        {
+          id: "04-j1", section: "判断题", type: "judge", knowledge: "动态平衡",
+          prompt: "化学平衡时，正反应和逆反应都停止。",
+          answer: false, answerText: "错误",
+          explanation: "错误。平衡是动态平衡，正逆反应仍在进行，只是速率相等。"
+        },
+        {
+          id: "04-j2", section: "判断题", type: "judge", knowledge: "K 的影响因素",
+          prompt: "在一定温度下，平衡常数 K 与反应物起始浓度无关。",
+          answer: true, answerText: "正确",
+          explanation: "正确。一定温度下 K 由反应本性和温度决定，与起始浓度无关。"
+        },
+        {
+          id: "04-j3", section: "判断题", type: "judge", knowledge: "Δng",
+          prompt: "K<sub>p</sub>=K<sub>c</sub>(RT)<sup>Δn<sub>g</sub></sup> 中的 Δn<sub>g</sub> 要统计所有反应物和生成物。",
+          answer: false, answerText: "错误",
+          explanation: "错误。Δn<sub>g</sub> 只统计气体计量数，固体和液体不统计。"
+        },
+        {
+          id: "04-j4", section: "判断题", type: "judge", knowledge: "纯固体纯液体",
+          prompt: "纯固体和纯液体通常不写入平衡常数表达式。",
+          answer: true, answerText: "正确",
+          explanation: "正确。纯固体和纯液体的活度可视为常数，不写入 K 和 Q 表达式。"
+        },
+        {
+          id: "04-j5", section: "判断题", type: "judge", knowledge: "Q 与 K",
+          prompt: "当 Q=K<sup>θ</sup> 时，ΔG<sub>T</sub>=0，体系处于平衡。",
+          answer: true, answerText: "正确",
+          explanation: "正确。ΔG<sub>T</sub>=2.30RT lg(Q/K<sup>θ</sup>)，Q=K<sup>θ</sup> 时 lg1=0。"
+        },
+        {
+          id: "04-j6", section: "判断题", type: "judge", knowledge: "温度影响",
+          prompt: "对任意反应，升高温度都会使 K<sup>θ</sup> 增大。",
+          answer: false, answerText: "错误",
+          explanation: "错误。吸热反应升温 K<sup>θ</sup> 增大，放热反应升温 K<sup>θ</sup> 减小。"
+        },
+        {
+          id: "04-j7", section: "判断题", type: "judge", knowledge: "多重平衡",
+          prompt: "反应式相加得到总反应时，总反应的平衡常数等于各反应平衡常数之和。",
+          answer: false, answerText: "错误",
+          explanation: "错误。反应式相加时，平衡常数相乘，不是相加。"
+        },
+        {
+          id: "04-j8", section: "判断题", type: "judge", knowledge: "压力影响",
+          prompt: "对 H<sub>2</sub>(g)+I<sub>2</sub>(g) ⇌ 2HI(g)，改变总压对平衡位置影响很小，因为反应前后气体计量数相同。",
+          answer: true, answerText: "正确",
+          explanation: "正确。该反应前后气体计量数均为 2，改变总压不会明显推动平衡移动。"
+        },
+        {
+          id: "04-s1", section: "综合题", type: "essay", knowledge: "压力、温度与 K",
+          prompt: "某温度下反应 N<sub>2</sub>O<sub>4</sub>(g) ⇌ 2NO<sub>2</sub>(g) 已达到平衡。请分析：增大总压时平衡如何移动；温度不变时 K<sup>θ</sup> 是否改变；如果升高温度后 K<sup>θ</sup> 增大，说明正向是吸热还是放热。",
+          answerText: "增大总压时平衡向左移动；温度不变 K<sup>θ</sup> 不变；升温使 K<sup>θ</sup> 增大说明正向为吸热反应。",
+          explanation: "N<sub>2</sub>O<sub>4</sub>(g) ⇌ 2NO<sub>2</sub>(g) 左侧 1 mol 气体，右侧 2 mol 气体。增大总压时，平衡向气体计量数减小的方向移动，所以向左移动。温度不变时，压力改变只改变 Q 和平衡组成，不改变 K<sup>θ</sup>。若升温后 K<sup>θ</sup> 增大，说明升温有利于正向反应，因此正向为吸热反应。"
+        },
+        {
+          id: "04-s2", section: "综合题", type: "essay", knowledge: "非标准态 Gibbs 判据",
+          prompt: "对反应 MnO<sub>2</sub>(s)+4H<sup>+</sup>(aq)+2Cl<sup>-</sup>(aq) ⇌ Mn<sup>2+</sup>(aq)+Cl<sub>2</sub>(g)+2H<sub>2</sub>O(l)，材料给出标态下 298 K 时 ΔG<sub>298</sub><sup>θ</sup>=25.4 kJ·mol⁻¹，但使用 12.0 mol·dm⁻³ 的 HCl 时反应可自发。说明为什么标态和浓盐酸条件下方向不同。",
+          answerText: "标态下 ΔG<sup>θ</sup>>0，正向非自发；浓盐酸使 Q 大幅减小，2.30RT lgQ 为较大负值，最终 ΔG<sub>T</sub><0，正向自发。",
+          explanation: "标态下 ΔG<sub>298</sub><sup>θ</sup>=25.4 kJ·mol⁻¹>0，因此正向非自发。实际条件不是标态时，应使用 ΔG<sub>T</sub>=ΔG<sub>T</sub><sup>θ</sup>+2.30RT lgQ。该反应 Q=[(p<sub>Cl2</sub>/p<sup>θ</sup>)([Mn<sup>2+</sup>]/c<sup>θ</sup>)]/[([H<sup>+</sup>]/c<sup>θ</sup>)<sup>4</sup>([Cl<sup>-</sup>]/c<sup>θ</sup>)<sup>2</sup>]。12.0 mol·dm⁻³ HCl 使 H<sup>+</sup> 和 Cl<sup>-</sup> 浓度很大，并处在 Q 的分母中，所以 Q 显著减小。材料中计算得到 ΔG<sub>T</sub>=-11.5 kJ·mol⁻¹，故浓盐酸条件下正向自发。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "05",
+      title: "05 第五章 酸碱电离平衡",
+      source: "chemistry_quiz/05-quiz.md",
+      questions: [
+        {
+          id: "05-b1", section: "基础概念题", type: "fill", knowledge: "Brønsted-Lowry 酸碱理论",
+          prompt: "Brønsted-Lowry 酸碱质子理论认为，酸是质子 ______，碱是质子 ______。",
+          accepted: ["给体", "受体"], requireAllAccepted: true,
+          answerText: "给体；受体。",
+          explanation: "酸给出质子，碱接受质子，这是 Brønsted-Lowry 酸碱质子理论的核心。"
+        },
+        {
+          id: "05-b2", section: "基础概念题", type: "choice", knowledge: "共轭酸碱对",
+          prompt: "下列哪一组不是共轭酸碱对？",
+          options: [["A", "NH<sub>3</sub> / NH<sub>2</sub><sup>-</sup>"], ["B", "NaOH / Na<sup>+</sup>"], ["C", "OH<sup>-</sup> / O<sup>2-</sup>"], ["D", "H<sub>3</sub>O<sup>+</sup> / H<sub>2</sub>O"]],
+          answer: "B", answerText: "B. NaOH / Na<sup>+</sup>",
+          explanation: "共轭酸碱对必须只相差一个质子。NaOH 和 Na<sup>+</sup> 不符合这个条件。"
+        },
+        {
+          id: "05-b3", section: "基础概念题", type: "fill", knowledge: "水的离子积",
+          prompt: "298 K 时，水的离子积常数 K<sub>w</sub>=[H<sub>3</sub>O<sup>+</sup>][OH<sup>-</sup>]=______。",
+          accepted: ["1.0×10^-14", "1.0*10^-14", "10^-14", "1×10^-14", "1.0×10⁻¹⁴"],
+          answerText: "1.0×10⁻¹⁴。",
+          explanation: "材料中 298 K 常用 K<sub>w</sub>=1.0×10⁻¹⁴。"
+        },
+        {
+          id: "05-b4", section: "基础概念题", type: "choice", knowledge: "pH 与 pOH",
+          prompt: "若某水溶液在 298 K 时 pH=11.30，则 pOH 为",
+          options: [["A", "2.70"], ["B", "7.00"], ["C", "11.30"], ["D", "14.00"]],
+          answer: "A", answerText: "A. 2.70",
+          explanation: "298 K 下 pH+pOH=14.00，所以 pOH=14.00-11.30=2.70。"
+        },
+        {
+          id: "05-b5", section: "基础概念题", type: "fill", knowledge: "弱酸简化条件",
+          prompt: "弱酸简化计算 [H<sub>3</sub>O<sup>+</sup>]≈√(K<sub>a</sub>c) 的常用条件是 α≤______% 或 c/K<sub>a</sub>≥______。",
+          accepted: ["5", "400"], requireAllAccepted: true,
+          answerText: "5；400。",
+          explanation: "材料给出的简化条件是电离度 α≤5%，或 c/K<sub>a</sub>≥400。"
+        },
+        {
+          id: "05-b6", section: "基础概念题", type: "choice", knowledge: "同离子效应",
+          prompt: "向 HAc 溶液中加入 NaAc，HAc 的电离度会",
+          options: [["A", "增大"], ["B", "降低"], ["C", "不变"], ["D", "先增大后降低"]],
+          answer: "B", answerText: "B. 降低",
+          explanation: "加入 Ac<sup>-</sup> 产生同离子效应，使 HAc 电离平衡左移，电离度降低。"
+        },
+        {
+          id: "05-b7", section: "基础概念题", type: "fill", knowledge: "指示剂变色范围",
+          prompt: "酸碱指示剂的变色范围通常约为 pH=pK<sub>HIn</sub>±______。",
+          accepted: ["1", "一"], answerText: "1。",
+          explanation: "人眼能分辨的酸色和碱色比例大约对应 pK<sub>HIn</sub>±1。"
+        },
+        {
+          id: "05-b8", section: "基础概念题", type: "choice", knowledge: "缓冲体系选择",
+          prompt: "配制 pH=4.75 左右的缓冲溶液，较合适的体系是",
+          options: [["A", "HAc/NaAc，pK<sub>a</sub>≈4.75"], ["B", "HCl/NaCl"], ["C", "NaOH/NaCl"], ["D", "纯水"]],
+          answer: "A", answerText: "A. HAc/NaAc，pK<sub>a</sub>≈4.75",
+          explanation: "缓冲体系应选择 pK<sub>a</sub> 接近目标 pH 的共轭酸碱对。"
+        },
+        {
+          id: "05-c1", section: "公式计算题", type: "calc", knowledge: "一元弱酸 pH",
+          prompt: "乳酸 CH<sub>3</sub>CHOHCOOH 的 K<sub>a</sub>=1.37×10⁻⁴。计算 0.10 mol·dm⁻³ 乳酸溶液的 pH 和电离度。",
+          answerText: "pH=2.43，α=3.7%。", formula: "[H₃O⁺] ≈ √(Kₐc)",
+          explanation: "使用公式：[H<sub>3</sub>O<sup>+</sup>]≈√(K<sub>a</sub>c)，α=[H<sub>3</sub>O<sup>+</sup>]/c。<br>已知量：K<sub>a</sub>=1.37×10⁻⁴，c=0.10 mol·dm⁻³。<br>单位换算：浓度单位一致。<br>简化检查：c/K<sub>a</sub>=0.10/(1.37×10⁻⁴)=730>400。<br>代入过程：[H<sub>3</sub>O<sup>+</sup>]=√[(1.37×10⁻⁴)(0.10)]=3.7×10⁻³ mol·dm⁻³；pH=-lg(3.7×10⁻³)=2.43；α=3.7×10⁻³/0.10=3.7%。<br>最终答案：pH=2.43，α=3.7%。<br>易错提醒：先检查简化条件。"
+        },
+        {
+          id: "05-c2", section: "公式计算题", type: "calc", knowledge: "强碱弱酸盐 pH",
+          prompt: "将 2.45 g 固体 NaCN 配成 500 cm³ 溶液。已知 M(NaCN)=49 g·mol⁻¹，K<sub>a</sub>(HCN)=4.93×10⁻¹⁰，求溶液 pH。",
+          answerText: "pH=11.15。", formula: "Kb(CN⁻)=Kw/Ka(HCN), [OH⁻]≈√(Kbc)",
+          explanation: "使用公式：K<sub>b</sub>(CN<sup>-</sup>)=K<sub>w</sub>/K<sub>a</sub>(HCN)，[OH<sup>-</sup>]≈√(K<sub>b</sub>c)。<br>已知量：m=2.45 g，M=49 g·mol⁻¹，V=500 cm³=0.500 dm³。<br>单位换算：c=(2.45/49)/0.500=0.10 mol·dm⁻³。K<sub>b</sub>=1.0×10⁻¹⁴/(4.93×10⁻¹⁰)=2.0×10⁻⁵。<br>代入过程：[OH<sup>-</sup>]=√[(2.0×10⁻⁵)(0.10)]=1.4×10⁻³ mol·dm⁻³；pOH=2.85；pH=14.00-2.85=11.15。<br>最终答案：pH=11.15。<br>易错提醒：Na<sup>+</sup> 不参与酸碱平衡，决定碱性的是 CN<sup>-</sup>。"
+        },
+        {
+          id: "05-c3", section: "公式计算题", type: "calc", knowledge: "同离子效应",
+          prompt: "向 1.0 dm³ 的 0.10 mol·dm⁻³ HAc 溶液中加入固体 NaAc，使 [Ac<sup>-</sup>]=1.0 mol·dm⁻³。取 K<sub>a</sub>(HAc)=1.8×10⁻⁵，求 [H<sub>3</sub>O<sup>+</sup>]、pH 和 HAc 电离度。",
+          answerText: "[H<sub>3</sub>O<sup>+</sup>]=1.8×10⁻⁶ mol·dm⁻³，pH=5.74，α=0.0018%。", formula: "[H₃O⁺] = Kₐ c酸 / c共轭碱",
+          explanation: "使用公式：[H<sub>3</sub>O<sup>+</sup>]=K<sub>a</sub>c<sub>弱酸</sub>/c<sub>共轭碱</sub>。<br>已知量：K<sub>a</sub>=1.8×10⁻⁵，[HAc]≈0.10 mol·dm⁻³，[Ac<sup>-</sup>]=1.0 mol·dm⁻³。<br>单位换算：浓度单位一致。<br>代入过程：[H<sub>3</sub>O<sup>+</sup>]=1.8×10⁻⁵×0.10/1.0=1.8×10⁻⁶ mol·dm⁻³；pH=-lg(1.8×10⁻⁶)=5.74；α=1.8×10⁻⁶/0.10=0.0018%。<br>最终答案：[H<sub>3</sub>O<sup>+</sup>]=1.8×10⁻⁶ mol·dm⁻³，pH=5.74，α=0.0018%。<br>易错提醒：加入共同离子后不能再用纯弱酸平方根公式。"
+        },
+        {
+          id: "05-c4", section: "公式计算题", type: "calc", knowledge: "两性离子 pH",
+          prompt: "已知 H<sub>3</sub>PO<sub>4</sub> 的 K<sub>a1</sub>=7.52×10⁻³，K<sub>a2</sub>=6.23×10⁻⁸。按材料近似公式计算 NaH<sub>2</sub>PO<sub>4</sub> 溶液的 pH。",
+          answerText: "pH≈4.68。", formula: "[H₃O⁺] ≈ √(Kₐ₁Kₐ₂)",
+          explanation: "使用公式：[H<sub>3</sub>O<sup>+</sup>]≈√(K<sub>a1</sub>K<sub>a2</sub>)。<br>已知量：K<sub>a1</sub>=7.52×10⁻³，K<sub>a2</sub>=6.23×10⁻⁸。<br>单位换算：无。<br>代入过程：[H<sub>3</sub>O<sup>+</sup>]=√[(7.52×10⁻³)(6.23×10⁻⁸)]=2.16×10⁻⁵ mol·dm⁻³；pH=-lg(2.16×10⁻⁵)=4.67。<br>最终答案：pH≈4.68。<br>易错提醒：H<sub>2</sub>PO<sub>4</sub><sup>-</sup> 是两性离子，不能简单当作普通一元弱酸。"
+        },
+        {
+          id: "05-c5", section: "公式计算题", type: "calc", knowledge: "缓冲溶液配制",
+          prompt: "欲配制 pH=9.20、[NH<sub>3</sub>·H<sub>2</sub>O]=1.0 mol·dm⁻³ 的缓冲溶液 500 cm³。已知 K<sub>b</sub>(NH<sub>3</sub>)=1.8×10⁻⁵，浓氨水浓度为 15 mol·dm⁻³，M(NH<sub>4</sub>Cl)=53.5 g·mol⁻¹。求需 NH<sub>4</sub>Cl 质量和浓氨水体积。",
+          answerText: "约 29 g NH<sub>4</sub>Cl；约 33 cm³ 浓氨水。", formula: "[OH⁻] = Kb [NH₃·H₂O] / [NH₄⁺]",
+          explanation: "使用公式：[OH<sup>-</sup>]=K<sub>b</sub>[NH<sub>3</sub>·H<sub>2</sub>O]/[NH<sub>4</sub><sup>+</sup>]。<br>已知量：pH=9.20，所以 pOH=4.80；[NH<sub>3</sub>·H<sub>2</sub>O]=1.0 mol·dm⁻³；K<sub>b</sub>=1.8×10⁻⁵；V=500 cm³=0.500 dm³。<br>单位换算：[OH<sup>-</sup>]=10⁻⁴·⁸⁰=1.6×10⁻⁵ mol·dm⁻³。<br>代入过程：[NH<sub>4</sub><sup>+</sup>]=K<sub>b</sub>[NH<sub>3</sub>·H<sub>2</sub>O]/[OH<sup>-</sup>]=(1.8×10⁻⁵×1.0)/(1.6×10⁻⁵)≈1.1 mol·dm⁻³；m(NH<sub>4</sub>Cl)=0.500×1.1×53.5≈29 g；V(浓氨水)=1.0×0.500/15=0.033 dm³=33 cm³。<br>最终答案：约 29 g NH<sub>4</sub>Cl，约 33 cm³ 浓氨水，定容至 500 cm³。<br>易错提醒：弱碱缓冲液要先由 pH 求 pOH。"
+        },
+        {
+          id: "05-j1", section: "判断题", type: "judge", knowledge: "Arrhenius 理论",
+          prompt: "Arrhenius 理论可以很好解释所有非水溶剂中的酸碱反应。",
+          answer: false, answerText: "错误",
+          explanation: "错误。Arrhenius 理论主要限于水溶液，非水体系需要溶剂理论或质子理论等解释。"
+        },
+        {
+          id: "05-j2", section: "判断题", type: "judge", knowledge: "共轭酸碱",
+          prompt: "酸给出质子后形成其共轭碱。",
+          answer: true, answerText: "正确",
+          explanation: "正确。酸与其共轭碱只相差一个质子。"
+        },
+        {
+          id: "05-j3", section: "判断题", type: "judge", knowledge: "Ka 与酸强弱",
+          prompt: "K<sub>a</sub> 越大，弱酸越弱。",
+          answer: false, answerText: "错误",
+          explanation: "错误。K<sub>a</sub> 越大，酸越容易给出质子，酸性越强。"
+        },
+        {
+          id: "05-j4", section: "判断题", type: "judge", knowledge: "Kw",
+          prompt: "酸溶液中也存在 OH<sup>-</sup>，碱溶液中也存在 H<sub>3</sub>O<sup>+</sup>。",
+          answer: true, answerText: "正确",
+          explanation: "正确。水溶液中 H<sub>3</sub>O<sup>+</sup> 和 OH<sup>-</sup> 总是同时存在，由 K<sub>w</sub> 联系。"
+        },
+        {
+          id: "05-j5", section: "判断题", type: "judge", knowledge: "电离常数与电离度",
+          prompt: "弱酸稀释时电离度会改变，但 K<sub>a</sub> 在一定温度下不变。",
+          answer: true, answerText: "正确",
+          explanation: "正确。电离度与浓度有关，电离常数在一定温度下不随浓度改变。"
+        },
+        {
+          id: "05-j6", section: "判断题", type: "judge", knowledge: "多元弱酸",
+          prompt: "对多元弱酸，计算酸度时通常第一步电离贡献最大。",
+          answer: true, answerText: "正确",
+          explanation: "正确。多元弱酸通常 K<sub>a1</sub>≫K<sub>a2</sub>，第一步电离决定主要酸度。"
+        },
+        {
+          id: "05-j7", section: "判断题", type: "judge", knowledge: "同离子效应",
+          prompt: "同离子效应会降低弱电解质电离度，并改变其电离常数。",
+          answer: false, answerText: "错误",
+          explanation: "错误。同离子效应降低电离度，但定温下 K<sub>a</sub> 或 K<sub>b</sub> 不变。"
+        },
+        {
+          id: "05-j8", section: "判断题", type: "judge", knowledge: "缓冲能力",
+          prompt: "缓冲溶液的缓冲能力有限，共轭酸碱对浓度比接近 1 时通常较强。",
+          answer: true, answerText: "正确",
+          explanation: "正确。共轭酸碱对总浓度较大、比例接近 1 时，缓冲能力通常较强。"
+        },
+        {
+          id: "05-s1", section: "综合题", type: "essay", knowledge: "缓冲体系选择",
+          prompt: "要配制 pH=3.20 的缓冲溶液，可选 HCO<sub>2</sub>H/HCO<sub>2</sub>Na 或 CH<sub>3</sub>CO<sub>2</sub>H/CH<sub>3</sub>CO<sub>2</sub>Na。已知 K<sub>a</sub>(HCO<sub>2</sub>H)=1.77×10⁻⁴，pK<sub>a</sub>=3.75；K<sub>a</sub>(HAc)=1.76×10⁻⁵，pK<sub>a</sub>=4.75。应选哪一对？说明理由。",
+          answerText: "应选 HCO<sub>2</sub>H/HCO<sub>2</sub>Na，因为 pK<sub>a</sub> 更接近目标 pH，所需酸碱比更接近 1。",
+          explanation: "目标 pH=3.20，选缓冲体系时应使 pK<sub>a</sub> 尽量接近目标 pH，并让共轭酸碱浓度比接近 1。对 HCO<sub>2</sub>H/HCO<sub>2</sub><sup>-</sup>：[HCO<sub>2</sub>H]/[HCO<sub>2</sub><sup>-</sup>]=[H<sub>3</sub>O<sup>+</sup>]/K<sub>a</sub>=6.3×10⁻⁴/(1.77×10⁻⁴)≈3.6。对 HAc/Ac<sup>-</sup>：[HAc]/[Ac<sup>-</sup>]=6.3×10⁻⁴/(1.76×10⁻⁵)≈36。前者比值更接近 1，缓冲能力更好。"
+        },
+        {
+          id: "05-s2", section: "综合题", type: "essay", knowledge: "中和反应与 pH",
+          prompt: "某学生认为：强酸与强碱等量中和后 pH=7，所以所有酸碱等量中和后 pH 都等于 7。请结合本章酸碱中和反应类型分析这个说法是否正确。",
+          answerText: "不正确。强酸强碱等量中和常近似中性；强酸弱碱生成弱酸，通常偏酸；弱酸强碱生成弱碱，通常偏碱；弱酸弱碱要比较生成的共轭酸碱强弱。",
+          explanation: "强酸强碱中和主要为 H<sub>3</sub>O<sup>+</sup>+OH<sup>-</sup>→2H<sub>2</sub>O，反应很完全，生成盐通常不水解，298 K 下近似中性。强酸弱碱等量反应后，弱碱转化为其共轭酸，溶液通常 pH<7。弱酸强碱等量反应后，弱酸转化为其共轭碱，溶液通常 pH>7。弱酸弱碱等量反应后，pH 要比较生成的共轭酸和共轭碱强弱，不能直接判断为 7。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "07",
+      title: "07 第七章 氧化还原平衡及电化学基础",
+      source: "chemistry_quiz/07-quiz.md",
+      questions: [
+        {
+          id: "07-b1", section: "基础概念题", type: "fill", knowledge: "氧化与还原",
+          prompt: "氧化数升高的过程称为 ______，氧化数降低的过程称为 ______。",
+          accepted: ["氧化", "还原"], requireAllAccepted: true,
+          answerText: "氧化；还原。",
+          explanation: "氧化数升高表示失电子，被氧化；氧化数降低表示得电子，被还原。"
+        },
+        {
+          id: "07-b2", section: "基础概念题", type: "choice", knowledge: "原电池正负极",
+          prompt: "原电池中负极发生的反应是",
+          options: [["A", "还原反应"], ["B", "氧化反应"], ["C", "中和反应"], ["D", "沉淀反应"]],
+          answer: "B", answerText: "B. 氧化反应",
+          explanation: "原电池中负极发生氧化反应，正极发生还原反应，电子从负极流向正极。"
+        },
+        {
+          id: "07-b3", section: "基础概念题", type: "fill", knowledge: "电池电动势",
+          prompt: "电池电动势计算公式为 E<sub>池</sub>=______。",
+          accepted: ["E正-E负", "e正-e负", "E(正)-E(负)", "正极电势-负极电势"],
+          answerText: "E<sub>正</sub>-E<sub>负</sub>。",
+          explanation: "电池电动势是正极电势减负极电势。"
+        },
+        {
+          id: "07-b4", section: "基础概念题", type: "choice", knowledge: "标准氢电极",
+          prompt: "标准氢电极的标准电极电势规定为",
+          options: [["A", "-1.0000 V"], ["B", "0.0000 V"], ["C", "0.3400 V"], ["D", "1.0000 V"]],
+          answer: "B", answerText: "B. 0.0000 V",
+          explanation: "单个电极电势不能直接测量，规定标准氢电极 E<sup>θ</sup>=0.0000 V 作为参比。"
+        },
+        {
+          id: "07-b5", section: "基础概念题", type: "fill", knowledge: "ΔG 与电动势",
+          prompt: "标准态下 ΔG<sub>T</sub><sup>θ</sup> 与电池电动势的关系为 ΔG<sub>T</sub><sup>θ</sup>=______。",
+          accepted: ["-nFE", "-nFEθ", "-nFE池θ", "-nF E池θ", "-nF E"], answerText: "-nFE<sub>池</sub><sup>θ</sup>。",
+          explanation: "标准态下电池最大非体积功与 Gibbs 自由能相连：ΔG<sup>θ</sup>=-nFE<sub>池</sub><sup>θ</sup>。"
+        },
+        {
+          id: "07-b6", section: "基础概念题", type: "choice", knowledge: "电极电势强度量",
+          prompt: "电极反应整体乘以 2 后，其标准电极电势 E<sup>θ</sup>",
+          options: [["A", "变为原来的 2 倍"], ["B", "变为原来的一半"], ["C", "不变"], ["D", "变号"]],
+          answer: "C", answerText: "C. 不变",
+          explanation: "电极电势是强度量，半反应乘系数时 E<sup>θ</sup> 不变；可加和的是 ΔG<sup>θ</sup>。"
+        },
+        {
+          id: "07-b7", section: "基础概念题", type: "fill", knowledge: "E 与 K",
+          prompt: "298 K 下，标准电动势和平衡常数关系为 E<sub>池</sub><sup>θ</sup>=______ lgK<sup>θ</sup>。",
+          accepted: ["0.0592/n", "0.0592／n", "0.0592除以n"], answerText: "0.0592/n。",
+          explanation: "298 K 时，E<sub>池</sub><sup>θ</sup>=(0.0592/n)lgK<sup>θ</sup>。"
+        },
+        {
+          id: "07-b8", section: "基础概念题", type: "choice", knowledge: "电极电势意义",
+          prompt: "电对 E<sup>θ</sup> 越大，通常说明",
+          options: [["A", "氧化型氧化能力越强"], ["B", "还原型还原能力越强"], ["C", "反应速率一定越快"], ["D", "该物质一定不能被还原"]],
+          answer: "A", answerText: "A. 氧化型氧化能力越强",
+          explanation: "E<sup>θ</sup> 越大，氧化型越容易得电子，氧化能力越强；还原型还原能力越弱。"
+        },
+        {
+          id: "07-c1", section: "公式计算题", type: "calc", knowledge: "E 与 K",
+          prompt: "已知 E<sup>θ</sup>(Fe<sup>3+</sup>/Fe<sup>2+</sup>)=0.771 V，E<sup>θ</sup>(Sn<sup>4+</sup>/Sn<sup>2+</sup>)=0.151 V。求反应 2Fe<sup>3+</sup>+Sn<sup>2+</sup>→2Fe<sup>2+</sup>+Sn<sup>4+</sup> 的 E<sup>θ</sup><sub>池</sub> 和 K<sup>θ</sup>。",
+          answerText: "E<sup>θ</sup><sub>池</sub>=0.620 V，K<sup>θ</sup>=8.8×10²⁰。", formula: "Eθ池 = Eθ正 - Eθ负；lgKθ = nEθ池/0.0592",
+          explanation: "使用公式：E<sup>θ</sup><sub>池</sub>=E<sup>θ</sup><sub>正</sub>-E<sup>θ</sup><sub>负</sub>，lgK<sup>θ</sup>=nE<sup>θ</sup><sub>池</sub>/0.0592。<br>已知量：正极 Fe<sup>3+</sup>/Fe<sup>2+</sup> 为 0.771 V；负极对应 Sn<sup>4+</sup>/Sn<sup>2+</sup> 为 0.151 V；n=2。<br>单位换算：电势均为 V，无需换算。<br>代入过程：E<sup>θ</sup><sub>池</sub>=0.771-0.151=0.620 V；lgK<sup>θ</sup>=2×0.620/0.0592=20.95；K<sup>θ</sup>=8.8×10²⁰。<br>最终答案：E<sup>θ</sup><sub>池</sub>=0.620 V，K<sup>θ</sup>=8.8×10²⁰。<br>易错提醒：K 与反应式写法有关，反应式减半时 K 会变。"
+        },
+        {
+          id: "07-c2", section: "公式计算题", type: "calc", knowledge: "氧化还原平衡常数",
+          prompt: "标准状态下，酸性溶液中 O<sub>2</sub> 氧化 Fe<sup>2+</sup> 为 Fe<sup>3+</sup>：O<sub>2</sub>+4H<sup>+</sup>+4Fe<sup>2+</sup>→2H<sub>2</sub>O+4Fe<sup>3+</sup>。已知 E<sup>θ</sup>(O<sub>2</sub>/H<sub>2</sub>O)=1.23 V，E<sup>θ</sup>(Fe<sup>3+</sup>/Fe<sup>2+</sup>)=0.77 V。求 E<sup>θ</sup><sub>池</sub> 和 K<sup>θ</sup>。",
+          answerText: "E<sup>θ</sup><sub>池</sub>=0.46 V，K<sup>θ</sup>≈1.2×10³¹。", formula: "lgKθ = nEθ池/0.0592",
+          explanation: "使用公式：E<sup>θ</sup><sub>池</sub>=E<sup>θ</sup><sub>正</sub>-E<sup>θ</sup><sub>负</sub>，lgK<sup>θ</sup>=nE<sup>θ</sup><sub>池</sub>/0.0592。<br>已知量：O<sub>2</sub>/H<sub>2</sub>O 作正极，E<sup>θ</sup>=1.23 V；Fe<sup>3+</sup>/Fe<sup>2+</sup> 作负极，E<sup>θ</sup>=0.77 V；n=4。<br>单位换算：无。<br>代入过程：E<sup>θ</sup><sub>池</sub>=1.23-0.77=0.46 V；lgK<sup>θ</sup>=4×0.46/0.0592=31.1；K<sup>θ</sup>≈1.2×10³¹。<br>最终答案：E<sup>θ</sup><sub>池</sub>=0.46 V，K<sup>θ</sup>≈1.2×10³¹。<br>易错提醒：n 是配平电池反应的电子转移数，这里是 4。"
+        },
+        {
+          id: "07-c3", section: "公式计算题", type: "calc", knowledge: "Nernst 方程",
+          prompt: "计算电池 (-) Pt|Fe<sup>2+</sup>(0.10 M),Fe<sup>3+</sup>(0.20 M)||Ag<sup>+</sup>(1.0 M)|Ag(+) 的电动势。已知 E<sup>θ</sup>(Ag<sup>+</sup>/Ag)=0.7996 V，E<sup>θ</sup>(Fe<sup>3+</sup>/Fe<sup>2+</sup>)=0.771 V，电池反应为 Fe<sup>2+</sup>+Ag<sup>+</sup>→Fe<sup>3+</sup>+Ag。",
+          answerText: "E<sub>池</sub>≈0.011 V。", formula: "E池 = Eθ池 - (0.0592/n)lgQ",
+          explanation: "使用公式：E<sub>池</sub>=E<sup>θ</sup><sub>池</sub>-(0.0592/n)lgQ。<br>已知量：E<sup>θ</sup><sub>池</sub>=0.7996-0.771=0.0286 V，n=1。<br>单位换算：无。<br>反应商：Q=[Fe<sup>3+</sup>]/([Fe<sup>2+</sup>][Ag<sup>+</sup>])=0.20/(0.10×1.0)=2.0。<br>代入过程：E<sub>池</sub>=0.0286-0.0592lg2.0=0.0286-0.0178=0.0108 V。<br>最终答案：E<sub>池</sub>≈0.011 V。<br>易错提醒：固体 Ag 不写入 Q。"
+        },
+        {
+          id: "07-c4", section: "公式计算题", type: "calc", knowledge: "未知电极电势计算",
+          prompt: "已知 ClO<sub>3</sub><sup>-</sup>+6H<sup>+</sup>+6e<sup>-</sup>→Cl<sup>-</sup>+3H<sub>2</sub>O，E<sub>1</sub><sup>θ</sup>=1.45 V；0.5Cl<sub>2</sub>+e<sup>-</sup>→Cl<sup>-</sup>，E<sub>2</sub><sup>θ</sup>=1.36 V。求 ClO<sub>3</sub><sup>-</sup>+6H<sup>+</sup>+5e<sup>-</sup>→0.5Cl<sub>2</sub>+3H<sub>2</sub>O 的 E<sub>3</sub><sup>θ</sup>。",
+          answerText: "E<sub>3</sub><sup>θ</sup>=1.47 V。", formula: "5E3θ = 6E1θ - E2θ",
+          explanation: "使用方法：目标半反应=反应 1 - 反应 2，必须用 nE 加权。<br>已知量：E<sub>1</sub><sup>θ</sup>=1.45 V，n<sub>1</sub>=6；E<sub>2</sub><sup>θ</sup>=1.36 V，n<sub>2</sub>=1；目标 n<sub>3</sub>=5。<br>单位换算：无。<br>代入过程：5E<sub>3</sub><sup>θ</sup>=6×1.45-1×1.36；E<sub>3</sub><sup>θ</sup>=(8.70-1.36)/5=1.47 V。<br>最终答案：E<sub>3</sub><sup>θ</sup>=1.47 V。<br>易错提醒：不能直接算 1.45-1.36，因为电极电势没有加和性。"
+        },
+        {
+          id: "07-c5", section: "公式计算题", type: "calc", knowledge: "酸度对电势影响",
+          prompt: "已知 Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup>+14H<sup>+</sup>+6e<sup>-</sup>→2Cr<sup>3+</sup>+7H<sub>2</sub>O，E<sup>θ</sup>=1.23 V。当 [Cr<sup>3+</sup>]=1，[Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup>]=1，[H<sup>+</sup>]=1.0×10⁻³ mol·dm⁻³ 时，求 E。",
+          answerText: "E≈0.82 V。", formula: "E = Eθ - (0.0592/6)lg([Cr³⁺]²/([Cr₂O₇²⁻][H⁺]¹⁴))",
+          explanation: "使用公式：E=E<sup>θ</sup>-(0.0592/6)lg{[Cr<sup>3+</sup>]<sup>2</sup>/([Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup>][H<sup>+</sup>]<sup>14</sup>)}。<br>已知量：[Cr<sup>3+</sup>]=1，[Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup>]=1，[H<sup>+</sup>]=10⁻³。<br>单位换算：均按相对浓度处理。<br>代入过程：Q=1/[1×(10⁻³)<sup>14</sup>]=10⁴²；E=1.23-(0.0592/6)lg10⁴²=1.23-0.414=0.82 V。<br>最终答案：E≈0.82 V。<br>易错提醒：[H<sup>+</sup>] 指数为 14，酸度影响非常大。"
+        },
+        {
+          id: "07-j1", section: "判断题", type: "judge", knowledge: "氧化剂",
+          prompt: "氧化剂在反应中得到电子，本身被还原。",
+          answer: true, answerText: "正确",
+          explanation: "正确。氧化剂得电子，氧化数降低，本身被还原。"
+        },
+        {
+          id: "07-j2", section: "判断题", type: "judge", knowledge: "氧化数规则",
+          prompt: "单质中元素的氧化数一定为 0。",
+          answer: true, answerText: "正确",
+          explanation: "正确。单质中电子没有整体转移或偏移，元素氧化数为 0。"
+        },
+        {
+          id: "07-j3", section: "判断题", type: "judge", knowledge: "配平介质",
+          prompt: "酸性介质配平氧化还原方程时可以保留 OH<sup>-</sup>。",
+          answer: false, answerText: "错误",
+          explanation: "错误。酸性介质中不能出现 OH<sup>-</sup>，应通过 H<sup>+</sup> 和 H<sub>2</sub>O 配平。"
+        },
+        {
+          id: "07-j4", section: "判断题", type: "judge", knowledge: "电子流向",
+          prompt: "原电池中电子从负极经外电路流向正极。",
+          answer: true, answerText: "正确",
+          explanation: "正确。负极发生氧化、放出电子，电子经外电路流向发生还原的正极。"
+        },
+        {
+          id: "07-j5", section: "判断题", type: "judge", knowledge: "电极电势意义",
+          prompt: "标准电极电势越大，还原型的还原能力越强。",
+          answer: false, answerText: "错误",
+          explanation: "错误。标准电极电势越大，氧化型氧化能力越强；还原型还原能力越弱。"
+        },
+        {
+          id: "07-j6", section: "判断题", type: "judge", knowledge: "自发性判据",
+          prompt: "E<sub>池</sub>>0 时，对应 ΔG<0，反应正向自发。",
+          answer: true, answerText: "正确",
+          explanation: "正确。由 ΔG=-nFE 可知，E>0 时 ΔG<0，正向自发。"
+        },
+        {
+          id: "07-j7", section: "判断题", type: "judge", knowledge: "Nernst 方程",
+          prompt: "Nernst 方程中，纯固体和电子都应写入反应商。",
+          answer: false, answerText: "错误",
+          explanation: "错误。纯固体、纯液体和电子不写入反应商；气体用相对分压。"
+        },
+        {
+          id: "07-j8", section: "判断题", type: "judge", knowledge: "热力学与动力学",
+          prompt: "E<sup>θ</sup><sub>池</sub>>0 只能说明热力学上自发，不保证反应速率一定快。",
+          answer: true, answerText: "正确",
+          explanation: "正确。材料中过二硫酸盐氧化 Mn<sup>2+</sup> 热力学可行，但需 Ag<sup>+</sup> 催化才明显进行。"
+        },
+        {
+          id: "07-s1", section: "综合题", type: "essay", knowledge: "电极电势判断方向",
+          prompt: "已知 E<sup>θ</sup>(Br<sub>2</sub>/Br<sup>-</sup>)=1.066 V，E<sup>θ</sup>(I<sub>2</sub>/I<sup>-</sup>)=0.536 V。判断 Br<sub>2</sub>+2I<sup>-</sup>→2Br<sup>-</sup>+I<sub>2</sub> 是否自发，并说明氧化剂、还原剂、正负极及电子流向。",
+          answerText: "标准态下自发；氧化剂 Br<sub>2</sub>，还原剂 I<sup>-</sup>；Br<sub>2</sub>/Br<sup>-</sup> 为正极，I<sup>-</sup>/I<sub>2</sub> 为负极，电子由负极流向正极。",
+          explanation: "E<sup>θ</sup>(Br<sub>2</sub>/Br<sup>-</sup>)=1.066 V 大于 E<sup>θ</sup>(I<sub>2</sub>/I<sup>-</sup>)=0.536 V，所以 Br<sub>2</sub> 氧化能力强于 I<sub>2</sub>，I<sup>-</sup> 还原能力强于 Br<sup>-</sup>。E<sup>θ</sup><sub>池</sub>=1.066-0.536=0.530 V>0，反应标准态下正向自发。Br<sub>2</sub> 得电子，是氧化剂，在正极发生还原；I<sup>-</sup> 失电子，是还原剂，在负极发生氧化；电子从负极流向正极。"
+        },
+        {
+          id: "07-s2", section: "综合题", type: "essay", knowledge: "Nernst 方程应用",
+          prompt: "结合 Nernst 方程说明：为什么生成沉淀、弱电解质、配合物或改变酸度都可能显著改变氧化还原反应方向？请至少举两个材料中的例子。",
+          answerText: "因为 Nernst 方程中电极电势取决于氧化型/还原型有效浓度；沉淀、弱电解质、配合物和酸度都会改变这些浓度。例：CuI 沉淀改变 Cu<sup>2+</sup>/Cu<sup>+</sup> 电势；HAc/Ac<sup>-</sup> 降低 [H<sup>+</sup>] 改变氢电极；NH<sub>3</sub> 配位降低游离 Cu<sup>2+</sup>；酸度增强 Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup> 氧化性。",
+          explanation: "Nernst 方程 E=E<sup>θ</sup>+(0.0592/n)lg(Ox/Red) 表明电极电势与氧化型和还原型有效浓度有关。生成 CuI(s) 会大幅降低 [Cu<sup>+</sup>]，使 Cu<sup>2+</sup>/Cu<sup>+</sup> 电极电势升高；加入 NaAc 后 HAc/Ac<sup>-</sup> 缓冲体系降低 [H<sup>+</sup>]，使 H<sup>+</sup>/H<sub>2</sub> 电势降低；Cu<sup>2+</sup> 与 NH<sub>3</sub> 形成 Cu(NH<sub>3</sub>)<sub>4</sub><sup>2+</sup> 降低游离 [Cu<sup>2+</sup>]；Cr<sub>2</sub>O<sub>7</sub><sup>2-</sup>/Cr<sup>3+</sup> 半反应含 14H<sup>+</sup>，酸度升高会显著增大 E。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "08",
+      title: "08 第八章 化学反应的速率与化学反应机理",
+      source: "chemistry_quiz/08-quiz.md",
+      questions: [
+        {
+          id: "08-b1", section: "基础概念题", type: "fill", knowledge: "化学动力学",
+          prompt: "化学动力学主要研究化学反应的 ______、影响因素和反应机理。",
+          accepted: ["速率", "反应速率"], answerText: "速率。",
+          explanation: "化学动力学研究反应速率、浓度/温度/介质/催化剂等影响因素，以及反应机理。"
+        },
+        {
+          id: "08-b2", section: "基础概念题", type: "choice", knowledge: "反应速率定义",
+          prompt: "对反应 2Fe<sup>3+</sup>+Sn<sup>2+</sup>→2Fe<sup>2+</sup>+Sn<sup>4+</sup>，若 Δ[Fe<sup>2+</sup>]/Δt=5.0×10⁻⁵ mol·dm⁻³·s⁻¹，则按 IUPAC 定义的反应速率为",
+          options: [["A", "5.0×10⁻⁵"], ["B", "2.5×10⁻⁵"], ["C", "1.0×10⁻⁴"], ["D", "-5.0×10⁻⁵"]],
+          answer: "B", answerText: "B. 2.5×10⁻⁵ mol·dm⁻³·s⁻¹",
+          explanation: "反应速率要除以对应计量数：v=(1/2)Δ[Fe<sup>2+</sup>]/Δt=2.5×10⁻⁵ mol·dm⁻³·s⁻¹。"
+        },
+        {
+          id: "08-b3", section: "基础概念题", type: "fill", knowledge: "质量作用定律",
+          prompt: "基元反应的速率方程可按 ______ 定律直接写出。",
+          accepted: ["质量作用", "质量作用定律"], answerText: "质量作用。",
+          explanation: "质量作用定律只可直接用于基元反应；非基元反应速率方程须由实验测定。"
+        },
+        {
+          id: "08-b4", section: "基础概念题", type: "choice", knowledge: "非基元反应",
+          prompt: "非基元反应的速率方程通常应",
+          options: [["A", "直接按总方程式计量数写出"], ["B", "由实验测定"], ["C", "总是零级"], ["D", "总是一级"]],
+          answer: "B", answerText: "B. 由实验测定",
+          explanation: "非基元反应路径复杂，总方程式不代表真实步骤，因此速率方程通常需要实验确定。"
+        },
+        {
+          id: "08-b5", section: "基础概念题", type: "fill", knowledge: "一级反应半衰期",
+          prompt: "一级反应的半衰期公式为 t<sub>1/2</sub>=______。",
+          accepted: ["0.693/k", "0.693／k", "ln2/k", "ln2／k"], answerText: "0.693/k。",
+          explanation: "一级反应半衰期 t<sub>1/2</sub>=0.693/k，与初始浓度无关。"
+        },
+        {
+          id: "08-b6", section: "基础概念题", type: "choice", knowledge: "零级反应",
+          prompt: "零级反应的特征是",
+          options: [["A", "速率与浓度无关"], ["B", "ln[A] 对 t 成直线"], ["C", "1/[A] 对 t 成直线"], ["D", "半衰期与初始浓度无关"]],
+          answer: "A", answerText: "A. 速率与浓度无关",
+          explanation: "零级反应 v=k，反应物以恒定速率消耗，[A] 对 t 作图为直线。"
+        },
+        {
+          id: "08-b7", section: "基础概念题", type: "fill", knowledge: "活化能",
+          prompt: "Arrhenius 公式中 ln k=-E<sub>a</sub>/(RT)+C，其中 E<sub>a</sub> 称为 ______。",
+          accepted: ["活化能", "表观活化能"], answerText: "活化能。",
+          explanation: "复杂反应实验求得的 E<sub>a</sub> 常称表观活化能。"
+        },
+        {
+          id: "08-b8", section: "基础概念题", type: "choice", knowledge: "催化剂作用",
+          prompt: "催化剂改变反应速率的主要原因是",
+          options: [["A", "改变反应物总能量"], ["B", "改变平衡常数"], ["C", "改变反应路径并降低活化能"], ["D", "只改变生成物浓度"]],
+          answer: "C", answerText: "C. 改变反应路径并降低活化能",
+          explanation: "催化剂提供新的低活化能路径，使更多反应物分子能越过能垒，但不改变平衡位置。"
+        },
+        {
+          id: "08-c1", section: "公式计算题", type: "calc", knowledge: "计量数与反应速率",
+          prompt: "对基元反应 A+2B→3C，若 -d[A]/dt=1.0×10⁻³ mol·dm⁻³·s⁻¹，求 +d[C]/dt 和反应速率 v。",
+          answerText: "+d[C]/dt=3.0×10⁻³ mol·dm⁻³·s⁻¹，v=1.0×10⁻³ mol·dm⁻³·s⁻¹。", formula: "v = -d[A]/dt = (1/3)d[C]/dt",
+          explanation: "使用公式：v=-d[A]/dt=(1/3)d[C]/dt。<br>已知量：-d[A]/dt=1.0×10⁻³ mol·dm⁻³·s⁻¹。<br>单位换算：无。<br>代入过程：v=1.0×10⁻³ mol·dm⁻³·s⁻¹；d[C]/dt=3v=3.0×10⁻³ mol·dm⁻³·s⁻¹。<br>最终答案：+d[C]/dt=3.0×10⁻³ mol·dm⁻³·s⁻¹，v=1.0×10⁻³ mol·dm⁻³·s⁻¹。<br>易错提醒：反应速率要按计量数归一化。"
+        },
+        {
+          id: "08-c2", section: "公式计算题", type: "calc", knowledge: "一级反应半衰期",
+          prompt: "已知某一级反应速率常数 k=2.2×10⁻⁵ s⁻¹。求其半衰期。",
+          answerText: "t<sub>1/2</sub>=3.15×10⁴ s≈8.75 h。", formula: "t1/2 = 0.693/k",
+          explanation: "使用公式：t<sub>1/2</sub>=0.693/k。<br>已知量：k=2.2×10⁻⁵ s⁻¹。<br>单位换算：结果先为 s，再换算为 h。<br>代入过程：t<sub>1/2</sub>=0.693/(2.2×10⁻⁵)=3.15×10⁴ s=8.75 h。<br>最终答案：3.15×10⁴ s，约 8.75 h。<br>易错提醒：一级反应半衰期与初始量无关。"
+        },
+        {
+          id: "08-c3", section: "公式计算题", type: "calc", knowledge: "一级反应剩余量",
+          prompt: "某一级反应初始质量为 2.00 g，k=2.2×10⁻⁵ s⁻¹。反应 2.00 h 后剩余多少？假设质量与浓度成正比。",
+          answerText: "剩余约 1.71 g。", formula: "ln(A/A0) = -kt",
+          explanation: "使用公式：ln([A]/[A]<sub>0</sub>)=-kt，质量与浓度成正比，所以 m/m<sub>0</sub>=e<sup>-kt</sup>。<br>已知量：m<sub>0</sub>=2.00 g，k=2.2×10⁻⁵ s⁻¹，t=2.00 h。<br>单位换算：2.00 h=7200 s。<br>代入过程：m/m<sub>0</sub>=e<sup>-(2.2×10⁻⁵)(7200)</sup>=e<sup>-0.1584</sup>=0.853；m=2.00×0.853=1.71 g。<br>最终答案：剩余约 1.71 g。<br>易错提醒：时间单位必须与 k 的单位一致。"
+        },
+        {
+          id: "08-c4", section: "公式计算题", type: "calc", knowledge: "二级反应积分式",
+          prompt: "某二级反应 A→P，[A]<sub>0</sub>=1.00 mol·dm⁻³，k=0.50 mol⁻¹·dm³·h⁻¹。求 t=4.0 h 时 [A]。",
+          answerText: "[A]=0.333 mol·dm⁻³。", formula: "1/[A] = 1/[A]0 + kt",
+          explanation: "使用公式：1/[A]=1/[A]<sub>0</sub>+kt。<br>已知量：[A]<sub>0</sub>=1.00 mol·dm⁻³，k=0.50 mol⁻¹·dm³·h⁻¹，t=4.0 h。<br>单位换算：时间单位与 k 匹配。<br>代入过程：1/[A]=1/1.00+0.50×4.0=3.00；[A]=0.333 mol·dm⁻³。<br>最终答案：[A]=0.333 mol·dm⁻³。<br>易错提醒：二级反应用 1/[A] 对 t 的关系，不是 ln[A]。"
+        },
+        {
+          id: "08-c5", section: "公式计算题", type: "calc", knowledge: "Arrhenius 公式与活化能",
+          prompt: "已知基元反应 A→B 的 ΔH=67 kJ·mol⁻¹，正反应 E<sub>a</sub>=90 kJ·mol⁻¹。求逆反应活化能。若 0 ℃ 时 k<sub>1</sub>=1.1×10⁻⁵ min⁻¹，求 45 ℃ 时 k<sub>2</sub>。取 R=8.314 J·mol⁻¹·K⁻¹。",
+          answerText: "逆反应活化能 23 kJ·mol⁻¹；k<sub>2</sub>≈3.0×10⁻³ min⁻¹。", formula: "Ea逆 = Ea正 - ΔH；ln(k2/k1)=Ea/R(1/T1-1/T2)",
+          explanation: "使用公式：E<sub>a,逆</sub>=E<sub>a,正</sub>-ΔH；ln(k<sub>2</sub>/k<sub>1</sub>)=E<sub>a</sub>/R(1/T<sub>1</sub>-1/T<sub>2</sub>)。<br>已知量：ΔH=67 kJ·mol⁻¹，E<sub>a,正</sub>=90 kJ·mol⁻¹，T<sub>1</sub>=273.15 K，T<sub>2</sub>=318.15 K，k<sub>1</sub>=1.1×10⁻⁵ min⁻¹。<br>单位换算：E<sub>a</sub>=90000 J·mol⁻¹。<br>代入过程：E<sub>a,逆</sub>=90-67=23 kJ·mol⁻¹；ln(k<sub>2</sub>/k<sub>1</sub>)=(90000/8.314)(1/273.15-1/318.15)=5.61；k<sub>2</sub>=1.1×10⁻⁵e<sup>5.61</sup>≈3.0×10⁻³ min⁻¹。<br>最终答案：23 kJ·mol⁻¹；k<sub>2</sub>≈3.0×10⁻³ min⁻¹。<br>易错提醒：Arrhenius 公式必须用 K。"
+        },
+        {
+          id: "08-j1", section: "判断题", type: "judge", knowledge: "热力学与动力学",
+          prompt: "热力学上自发的反应一定具有很快的反应速率。",
+          answer: false, answerText: "错误",
+          explanation: "错误。热力学自发不代表速率快，合成氨和汽车尾气反应都体现了这一点。"
+        },
+        {
+          id: "08-j2", section: "判断题", type: "judge", knowledge: "反应速率符号",
+          prompt: "反应速率按 IUPAC 定义通常取正值。",
+          answer: true, answerText: "正确",
+          explanation: "正确。反应物项前加负号，生成物项为正，最终反应速率取正值。"
+        },
+        {
+          id: "08-j3", section: "判断题", type: "judge", knowledge: "速率常数",
+          prompt: "速率常数 k 在给定温度和条件下与反应物浓度无关。",
+          answer: true, answerText: "正确",
+          explanation: "正确。给定温度和条件下，k 与浓度无关；浓度改变的是速率 v。"
+        },
+        {
+          id: "08-j4", section: "判断题", type: "judge", knowledge: "非基元反应速率式",
+          prompt: "对所有反应，都可直接由总反应方程式写出速率方程。",
+          answer: false, answerText: "错误",
+          explanation: "错误。只有基元反应可直接按质量作用定律写速率式；非基元反应要实验测定。"
+        },
+        {
+          id: "08-j5", section: "判断题", type: "judge", knowledge: "一级反应",
+          prompt: "一级反应的 lg[A] 对 t 作图为直线。",
+          answer: true, answerText: "正确",
+          explanation: "正确。一级反应满足 lg[A]=lg[A]<sub>0</sub>-kt/2.30。"
+        },
+        {
+          id: "08-j6", section: "判断题", type: "judge", knowledge: "二级反应半衰期",
+          prompt: "二级反应的半衰期与初始浓度无关。",
+          answer: false, answerText: "错误",
+          explanation: "错误。二级反应 t<sub>1/2</sub>=1/(k[A]<sub>0</sub>)，与初始浓度有关。"
+        },
+        {
+          id: "08-j7", section: "判断题", type: "judge", knowledge: "催化剂",
+          prompt: "催化剂能改变反应路径，但不改变平衡位置。",
+          answer: true, answerText: "正确",
+          explanation: "正确。催化剂降低活化能、改变反应路径，只改变达到平衡的时间。"
+        },
+        {
+          id: "08-j8", section: "判断题", type: "judge", knowledge: "中间体与催化剂",
+          prompt: "中间体和催化剂完全相同，二者没有区别。",
+          answer: false, answerText: "错误",
+          explanation: "错误。中间体先生成后消耗；催化剂先参与后再生，反应前后总量不变。"
+        },
+        {
+          id: "08-s1", section: "综合题", type: "essay", knowledge: "反应机理与速率方程",
+          prompt: "某反应的总方程式很简单，但实验发现速率方程与计量数不一致。请从“基元反应、非基元反应、反应机理、决速步”的角度解释为什么不能直接由总方程式写速率方程。",
+          answerText: "总方程式只表示始末态，不代表真实路径；只有基元反应才能按质量作用定律直接写速率式。非基元反应由多个基元步骤组成，速率由机理和决速步控制，所以速率方程需实验测定或由机理推导。",
+          explanation: "总反应方程式只表示始态和终态的化学计量关系，不一定表示反应真实路径。若反应一步完成，才称为基元反应，此时可按质量作用定律写速率方程。多数反应是非基元反应，需经历多个基元步骤，速率由反应机理决定。复杂反应中最慢的一步常称决速步，可能控制总反应速率。因此即使总方程式很简单，速率方程中的浓度指数也可能与计量数不一致，必须由实验测定或由机理推导。"
+        },
+        {
+          id: "08-s2", section: "综合题", type: "essay", knowledge: "温度、活化能与催化",
+          prompt: "请结合 Arrhenius 公式和催化剂作用原理说明：升高温度和加入催化剂都能加快反应速率，但二者本质上有什么不同？催化剂为什么不改变平衡常数？",
+          answerText: "升温通过改变分子能量分布增大 k；催化剂通过改变反应路径、降低活化能增大 k。催化剂同时影响正逆反应速率，不改变反应始末态和 ΔG，因此不改变平衡常数。",
+          explanation: "Arrhenius 公式 k=Ae<sup>-Ea/RT</sup> 表明温度升高时，更多分子具有足够能量越过能垒，通常 k 增大。催化剂则提供新的低活化能路径，使反应在同一温度下更快进行。二者都能增大速率，但升温改变的是分子能量分布，催化剂改变的是反应路径。催化剂同时并同等程度影响正逆反应速率，因此不改变平衡常数和平衡位置，只改变达到平衡的时间。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "09",
+      title: "09 第九章 原子结构",
+      source: "chemistry_quiz/09-quiz.md",
+      questions: [
+        {
+          id: "09-b1", section: "基础概念题", type: "fill", knowledge: "能量量子化",
+          prompt: "Planck 能量量子化公式为 E=______。",
+          accepted: ["hν", "hv", "hnu"], answerText: "E=hν。",
+          explanation: "每个光量子的能量与频率成正比，比例常数为 Planck 常数 h。"
+        },
+        {
+          id: "09-b2", section: "基础概念题", type: "choice", knowledge: "Bohr 能级",
+          prompt: "Bohr 模型中氢原子第 n 能级能量为",
+          options: [["A", "E<sub>n</sub>=-13.6n<sup>2</sup> eV"], ["B", "E<sub>n</sub>=-13.6/n<sup>2</sup> eV"], ["C", "E<sub>n</sub>=13.6/n eV"], ["D", "E<sub>n</sub>=0"]],
+          answer: "B", answerText: "B. E<sub>n</sub>=-13.6/n<sup>2</sup> eV",
+          explanation: "氢原子 Bohr 能级为 E<sub>n</sub>=-13.6/n<sup>2</sup> eV，能级为负表示电子处于束缚态。"
+        },
+        {
+          id: "09-b3", section: "基础概念题", type: "fill", knowledge: "de Broglie 关系",
+          prompt: "de Broglie 关系式为 λ=______。",
+          accepted: ["h/p", "h/mv", "h／p", "h／mv"], answerText: "λ=h/p=h/(mv)。",
+          explanation: "de Broglie 关系把微观粒子的动量 p 与波长 λ 联系起来。"
+        },
+        {
+          id: "09-b4", section: "基础概念题", type: "choice", knowledge: "量子数取值",
+          prompt: "下列量子数组合正确的是",
+          options: [["A", "n=2, l=2, m=0"], ["B", "n=3, l=1, m=-1"], ["C", "n=2, l=0, m=1"], ["D", "n=1, l=1, m=0"]],
+          answer: "B", answerText: "B. n=3, l=1, m=-1",
+          explanation: "n=3 时 l 可取 0、1、2；l=1 时 m 可取 -1、0、+1，所以 B 合法。"
+        },
+        {
+          id: "09-b5", section: "基础概念题", type: "fill", knowledge: "角量子数与亚层",
+          prompt: "l=0,1,2,3 分别对应的亚层符号为 ______。",
+          accepted: ["s,p,d,f", "spdf", "s p d f"], answerText: "s, p, d, f。",
+          explanation: "角量子数 l=0、1、2、3 分别对应 s、p、d、f 亚层。"
+        },
+        {
+          id: "09-b6", section: "基础概念题", type: "choice", knowledge: "亚层容量",
+          prompt: "一个 d 亚层最多容纳的电子数为",
+          options: [["A", "2"], ["B", "6"], ["C", "10"], ["D", "14"]],
+          answer: "C", answerText: "C. 10",
+          explanation: "d 亚层有 5 个轨道，每个轨道最多容纳 2 个电子，共 10 个。"
+        },
+        {
+          id: "09-b7", section: "基础概念题", type: "fill", knowledge: "Pauli 不相容原理",
+          prompt: "Pauli 不相容原理可表述为同一原子中没有 ______ 个量子数完全相同的电子。",
+          accepted: ["四", "4"], answerText: "四。",
+          explanation: "同一原子中没有四个量子数完全相同的电子；同一轨道最多两个电子且自旋相反。"
+        },
+        {
+          id: "09-b8", section: "基础概念题", type: "choice", knowledge: "原子半径周期性",
+          prompt: "同周期主族元素从左到右，一般原子半径",
+          options: [["A", "增大"], ["B", "减小"], ["C", "不变"], ["D", "无规律且不能比较"]],
+          answer: "B", answerText: "B. 减小",
+          explanation: "同周期从左到右有效核电荷一般增大，核对价电子吸引增强，原子半径一般减小。"
+        },
+        {
+          id: "09-c1", section: "公式计算题", type: "calc", knowledge: "氢原子电离能",
+          prompt: "计算氢原子从 n=1 到 n=∞ 的电离能，先求单个原子所需能量，再求 1 mol 氢原子的电离能。已知 1 eV=1.602×10⁻¹⁹ J，N<sub>A</sub>=6.02×10²³ mol⁻¹。",
+          answerText: "单个氢原子约 2.18×10⁻¹⁸ J；1 mol 约 1310 kJ·mol⁻¹。", formula: "E_n = -13.6/n^2 eV",
+          explanation: "使用公式：E<sub>n</sub>=-13.6/n<sup>2</sup> eV。<br>已知量：E<sub>1</sub>=-13.6 eV，E<sub>∞</sub>=0。<br>代入过程：ΔE=0-(-13.6)=13.6 eV。<br>单位换算：13.6 eV=13.6×1.602×10⁻¹⁹=2.18×10⁻¹⁸ J；1 mol 为 2.18×10⁻¹⁸×6.02×10²³=1.31×10⁶ J·mol⁻¹=1310 kJ·mol⁻¹。<br>最终答案：单个氢原子约 2.18×10⁻¹⁸ J；1 mol 约 1310 kJ·mol⁻¹。<br>易错提醒：能级是负值，电离能是吸收能量，结果取正值。"
+        },
+        {
+          id: "09-c2", section: "公式计算题", type: "calc", knowledge: "Bohr 跃迁波长",
+          prompt: "计算氢原子 n=3→n=2 跃迁发射光子的波长。用 E<sub>n</sub>=-13.6/n² eV，hc=1240 eV·nm。",
+          answerText: "λ≈656 nm，对应 Balmer 红线。", formula: "ΔE = hc/λ",
+          explanation: "使用公式：E<sub>n</sub>=-13.6/n<sup>2</sup> eV，ΔE=hc/λ。<br>已知量：n<sub>i</sub>=3，n<sub>f</sub>=2。<br>代入过程：E<sub>3</sub>=-13.6/9=-1.51 eV；E<sub>2</sub>=-13.6/4=-3.40 eV；ΔE=|-3.40-(-1.51)|=1.89 eV。<br>单位换算：hc 已用 eV·nm，无需再换 J。<br>λ=1240/1.89=656 nm。<br>最终答案：λ≈656 nm。<br>易错提醒：发射光子能量取能级差的绝对值。"
+        },
+        {
+          id: "09-c3", section: "公式计算题", type: "calc", knowledge: "de Broglie 波长",
+          prompt: "计算速度为 5.9×10⁵ m·s⁻¹ 的电子的 de Broglie 波长。已知 h=6.626×10⁻³⁴ J·s，m<sub>e</sub>=9.11×10⁻³¹ kg。",
+          answerText: "λ≈1.2×10⁻⁹ m=12 Å。", formula: "λ = h/(mv)",
+          explanation: "使用公式：λ=h/(mv)。<br>已知量：h=6.626×10⁻³⁴ J·s，m=9.11×10⁻³¹ kg，v=5.9×10⁵ m·s⁻¹。<br>代入过程：λ=6.626×10⁻³⁴/[(9.11×10⁻³¹)(5.9×10⁵)]=1.23×10⁻⁹ m。<br>单位换算：1 Å=10⁻¹⁰ m，所以 1.23×10⁻⁹ m≈12 Å。<br>最终答案：λ≈1.2×10⁻⁹ m=12 Å。<br>易错提醒：J·s 可化为 kg·m²·s⁻¹，最后单位可约成 m。"
+        },
+        {
+          id: "09-c4", section: "公式计算题", type: "calc", knowledge: "量子数与轨道数",
+          prompt: "判断 φ(3,2,1) 代表哪个亚层轨道，并说明该亚层有多少个轨道、最多容纳多少电子。",
+          answerText: "代表 3d 亚层中的一个轨道；该亚层有 5 个轨道，最多容纳 10 个电子。", formula: "轨道数 = 2l+1",
+          explanation: "使用公式：同一 l 亚层轨道数为 2l+1。<br>已知量：φ(3,2,1) 中 n=3，l=2，m=1。<br>代入过程：l=2 对应 d 亚层，所以是 3d；轨道数=2×2+1=5。<br>单位换算：无。<br>最多电子数：每个轨道最多 2 个电子，所以 5×2=10。<br>最终答案：3d 亚层中的一个轨道；5 个轨道，最多 10 个电子。<br>易错提醒：l=2 对应 d，不是 p。"
+        },
+        {
+          id: "09-c5", section: "公式计算题", type: "calc", knowledge: "有效核电荷与轨道能量",
+          prompt: "用 Slater 规则材料中给出的 Na 价电子结果：Z*=2.20，估算 Na 的 3s 电子能量。用 E=-13.6(Z*)²/n² eV，n=3。",
+          answerText: "E≈-7.3 eV。", formula: "E = -13.6(Z*)^2/n^2 eV",
+          explanation: "使用公式：E=-13.6(Z*)²/n² eV。<br>已知量：Z*=2.20，n=3。<br>代入过程：E=-13.6×(2.20)²/3²=-13.6×4.84/9=-7.3 eV。<br>单位换算：题中公式直接给出 eV。<br>最终答案：E≈-7.3 eV。<br>易错提醒：能量为负表示电子处于束缚态。"
+        },
+        {
+          id: "09-j1", section: "判断题", type: "judge", knowledge: "Bohr 模型适用范围",
+          prompt: "Bohr 模型可以很好解释所有多电子原子的光谱。",
+          answer: false, answerText: "错误",
+          explanation: "错误。Bohr 模型主要适用于氢原子和类氢离子，不能解释多电子原子光谱。"
+        },
+        {
+          id: "09-j2", section: "判断题", type: "judge", knowledge: "波粒二象性",
+          prompt: "电子具有波粒二象性，因此不能用经典确定轨道描述。",
+          answer: true, answerText: "正确",
+          explanation: "正确。电子具有波动性并受测不准关系限制，不能用经典确定轨道描述。"
+        },
+        {
+          id: "09-j3", section: "判断题", type: "judge", knowledge: "波函数物理意义",
+          prompt: "|φ|² 表示电子在空间某点附近的概率密度。",
+          answer: true, answerText: "正确",
+          explanation: "正确。|φ|² 是电子概率密度的物理意义，电子云就是概率密度的空间图像。"
+        },
+        {
+          id: "09-j4", section: "判断题", type: "judge", knowledge: "p 亚层容量",
+          prompt: "p 亚层有 6 个轨道，最多容纳 6 个电子。",
+          answer: false, answerText: "错误",
+          explanation: "错误。p 亚层有 3 个轨道，每个轨道最多 2 个电子，所以最多容纳 6 个电子。"
+        },
+        {
+          id: "09-j5", section: "判断题", type: "judge", knowledge: "Pauli 不相容原理",
+          prompt: "同一原子轨道最多容纳两个自旋相反的电子。",
+          answer: true, answerText: "正确",
+          explanation: "正确。这是 Pauli 不相容原理的常见表述。"
+        },
+        {
+          id: "09-j6", section: "判断题", type: "judge", knowledge: "氢原子轨道简并",
+          prompt: "氢原子中 3s、3p、3d 轨道能量相同。",
+          answer: true, answerText: "正确",
+          explanation: "正确。氢原子能量只由主量子数 n 决定，因此 3s、3p、3d 简并。"
+        },
+        {
+          id: "09-j7", section: "判断题", type: "judge", knowledge: "第一电离能趋势",
+          prompt: "同周期元素从左到右第一电离能总是严格递增，没有例外。",
+          answer: false, answerText: "错误",
+          explanation: "错误。同周期第一电离能总体增大，但 Be、N、Mg、P 等因全充满或半充满稳定构型出现异常。"
+        },
+        {
+          id: "09-j8", section: "判断题", type: "judge", knowledge: "催化剂与电子排布",
+          prompt: "催化剂会改变原子的电子排布原则。",
+          answer: false, answerText: "错误",
+          explanation: "错误。催化剂影响化学反应速率，不改变原子核外电子排布的基本原则。"
+        },
+        {
+          id: "09-s1", section: "综合题", type: "essay", knowledge: "四个量子数与电子层容量",
+          prompt: "请用四个量子数解释为什么第 3 电子层最多可容纳 18 个电子，并列出第 3 层包含哪些亚层。",
+          answerText: "第 3 层 n=3，l 可取 0、1、2，对应 3s、3p、3d；轨道数为 1+3+5=9，每个轨道最多 2 个电子，所以最多 18 个电子。",
+          explanation: "n=3 时，角量子数 l=0、1、2，分别对应 3s、3p、3d。l=0 时 m=0，有 1 个轨道；l=1 时 m=-1、0、+1，有 3 个轨道；l=2 时 m=-2、-1、0、+1、+2，有 5 个轨道。总轨道数 1+3+5=9=n²。每个轨道最多容纳两个自旋相反的电子，所以第 3 层最多容纳 18 个电子，即 2n²。"
+        },
+        {
+          id: "09-s2", section: "综合题", type: "essay", knowledge: "屏蔽效应、钻穿效应与电子排布",
+          prompt: "结合屏蔽效应、钻穿效应和电子排布原则，说明为什么多电子原子中轨道能级会发生分裂和交错，并解释电子排布为什么不能只机械照搬近似能级图。",
+          answerText: "多电子原子中电子间排斥产生屏蔽效应，不同轨道钻穿能力不同，使同一 n 层不同 l 的轨道能量分裂；随原子序数变化还会出现 4s/3d 等能级交错。电子排布还要满足 Pauli 原理、最低能量原理、Hund 规则，并以实验事实为准。",
+          explanation: "氢原子只有一个电子，不存在电子间排斥，所以同一 n 下不同 l 的轨道能量相同。多电子原子中，一个电子既受原子核吸引，又受其他电子排斥，其他电子会屏蔽部分核电荷，使有效核电荷 Z*=Z-σ 降低。不同轨道径向分布不同，钻入内层靠近原子核的能力不同，一般 s 电子钻穿能力强、能量低，p、d、f 依次减弱，因此同一 n 层发生能级分裂。随着原子序数增加，屏蔽和钻穿综合作用会造成能级交错，如 4s 与 3d。电子排布要同时满足 Pauli 不相容原理、最低能量原理和 Hund 规则，过渡元素还可能因半充满、全充满等稳定性出现例外，所以不能只机械照搬近似能级图。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "10",
+      title: "10 第十章 分子与晶体结构",
+      source: "chemistry_quiz/10-quiz.md",
+      questions: [
+        {
+          id: "10-b1", section: "基础概念题", type: "fill", knowledge: "离子键特点",
+          prompt: "离子键的本质是正、负离子之间的 ______，其特点是没有 ______ 和 ______。",
+          accepted: ["静电吸引", "方向性", "饱和性"], requireAllAccepted: true,
+          answerText: "静电吸引；方向性；饱和性。",
+          explanation: "离子键本质是库仑静电作用，所以只要空间许可，一个离子可吸引多个异号离子。"
+        },
+        {
+          id: "10-b2", section: "基础概念题", type: "choice", knowledge: "离子化合物表达",
+          prompt: "下列说法正确的是",
+          options: [["A", "NaCl 表示一个独立的 NaCl 分子"], ["B", "离子键具有严格方向性"], ["C", "NaCl 表示晶体中 Na<sup>+</sup> 与 Cl<sup>-</sup> 的比例为 1:1"], ["D", "离子晶体中配位数只由电荷数决定"]],
+          answer: "C", answerText: "C. NaCl 表示晶体中 Na<sup>+</sup> 与 Cl<sup>-</sup> 的比例为 1:1",
+          explanation: "NaCl 表示晶体中 Na<sup>+</sup> 与 Cl<sup>-</sup> 的比例，不表示独立分子；离子键没有方向性，配位数不只由电荷数决定。"
+        },
+        {
+          id: "10-b3", section: "基础概念题", type: "fill", knowledge: "Lewis 结构",
+          prompt: "Lewis 结构中，通常用小黑点表示 ______，用短线表示 ______。",
+          accepted: ["价电子", "共享电子对"], requireAllAccepted: true,
+          answerText: "价电子；共享电子对。",
+          explanation: "Lewis 结构用点表示价电子，用短线表示成键电子对。"
+        },
+        {
+          id: "10-b4", section: "基础概念题", type: "choice", knowledge: "σ键与π键",
+          prompt: "下列关于 σ 键和 π 键的说法错误的是",
+          options: [["A", "σ 键通常由轨道沿键轴头碰头重叠形成"], ["B", "π 键通常由轨道肩并肩平行重叠形成"], ["C", "单键通常含一个 σ 键"], ["D", "双键通常含两个 σ 键"]],
+          answer: "D", answerText: "D. 双键通常含两个 σ 键",
+          explanation: "双键通常由一个 σ 键和一个 π 键组成，不是两个 σ 键。"
+        },
+        {
+          id: "10-b5", section: "基础概念题", type: "fill", knowledge: "VSEPR 排斥顺序",
+          prompt: "VSEPR 中孤对电子和成键电子对的排斥强度顺序为 ______。",
+          accepted: ["lp-lp>lp-bp>bp-bp", "lp-lp > lp-bp > bp-bp", "孤对-孤对>孤对-成键>成键-成键"],
+          answerText: "lp-lp > lp-bp > bp-bp。",
+          explanation: "孤对电子只受一个原子核束缚，电子云更分散，对邻近电子对排斥更强。"
+        },
+        {
+          id: "10-b6", section: "基础概念题", type: "choice", knowledge: "NH3 构型",
+          prompt: "NH<sub>3</sub> 的中心原子周围有 4 对价层电子，其中 1 对为孤对电子，因此其分子构型为",
+          options: [["A", "正四面体"], ["B", "平面三角形"], ["C", "三角锥形"], ["D", "直线形"]],
+          answer: "C", answerText: "C. 三角锥形",
+          explanation: "NH<sub>3</sub> 电子对几何构型为四面体，但分子构型不包括孤对电子，所以为三角锥形。"
+        },
+        {
+          id: "10-b7", section: "基础概念题", type: "fill", knowledge: "偶极矩",
+          prompt: "分子偶极矩公式为 μ=______，1 D=______ C·m。",
+          accepted: ["q·d", "qd", "q*d", "3.336×10^-30", "3.336e-30"], requireAllAccepted: true,
+          answerText: "μ=q·d；1 D=3.336×10⁻³⁰ C·m。",
+          explanation: "偶极矩等于偶极电荷量与偶极长乘积。"
+        },
+        {
+          id: "10-b8", section: "基础概念题", type: "choice", knowledge: "分子极性",
+          prompt: "下列分子中，含极性键但整体为非极性分子的是",
+          options: [["A", "HCl"], ["B", "H<sub>2</sub>O"], ["C", "CO<sub>2</sub>"], ["D", "NH<sub>3</sub>"]],
+          answer: "C", answerText: "C. CO<sub>2</sub>",
+          explanation: "CO<sub>2</sub> 的 C=O 键有极性，但分子为线形对称，键偶极抵消。"
+        },
+        {
+          id: "10-c1", section: "公式计算题", type: "calc", knowledge: "离子半径",
+          prompt: "已知某离子晶体中相邻正、负离子核间距 r<sub>0</sub>=282 pm，若 r<sub>-</sub>=181 pm，求 r<sub>+</sub>。",
+          answerText: "r<sub>+</sub>=101 pm。", formula: "r0 = r+ + r-",
+          explanation: "使用公式：r<sub>0</sub>=r<sub>+</sub>+r<sub>-</sub>。<br>代入过程：r<sub>+</sub>=r<sub>0</sub>-r<sub>-</sub>=282-181=101 pm。<br>最终答案：r<sub>+</sub>=101 pm。<br>易错提醒：r<sub>0</sub> 是核间距，不是正离子半径。"
+        },
+        {
+          id: "10-c2", section: "公式计算题", type: "calc", knowledge: "Lande 模型",
+          prompt: "按 Lande 模型，某晶体中 r<sub>0</sub>=260 pm，且满足正负离子接触、负负离子也接触。求 r<sub>-</sub> 和 r<sub>+</sub>。",
+          answerText: "r<sub>-</sub>≈184 pm，r<sub>+</sub>≈76 pm。", formula: "r- = r0/√2；r+ = r0 - r-",
+          explanation: "使用公式：r<sub>-</sub>=r<sub>0</sub>/√2，r<sub>+</sub>=r<sub>0</sub>-r<sub>-</sub>。<br>代入过程：r<sub>-</sub>=260/√2=184 pm；r<sub>+</sub>=260-184=76 pm。<br>最终答案：r<sub>-</sub>≈184 pm，r<sub>+</sub>≈76 pm。<br>易错提醒：是除以 √2，不是除以 2。"
+        },
+        {
+          id: "10-c3", section: "公式计算题", type: "calc", knowledge: "半径比规则",
+          prompt: "预测某 AB 型离子晶体结构：已知 r<sub>+</sub>=95 pm，r<sub>-</sub>=181 pm，求 r<sub>+</sub>/r<sub>-</sub>，并判断更可能属于 CsCl 型、NaCl 型还是 ZnS 型。",
+          answerText: "r<sub>+</sub>/r<sub>-</sub>=0.525，更可能为 NaCl 型。", formula: "0.414 ≤ r+/r- ≤ 0.732 → NaCl 型",
+          explanation: "代入过程：r<sub>+</sub>/r<sub>-</sub>=95/181=0.525。该值位于 0.414 到 0.732 之间，对应 NaCl 型，配位数 6:6。<br>最终答案：r<sub>+</sub>/r<sub>-</sub>=0.525，更可能为 NaCl 型。<br>易错提醒：半径比规则是近似规则，离子极化可能造成例外。"
+        },
+        {
+          id: "10-c4", section: "公式计算题", type: "calc", knowledge: "VSEPR 构型判断",
+          prompt: "用 VSEPR 判断 XeF<sub>4</sub> 的分子构型。已知 Xe 价电子数为 8，每个 F 提供 1 个电子。",
+          answerText: "XeF<sub>4</sub> 为平面正方形。", formula: "价层电子对数 = (中心原子价电子数 + 配原子提供电子数)/2",
+          explanation: "使用公式：价层电子对数=(8+4×1)/2=6。4 对为 Xe-F 成键电子对，孤对数为 6-4=2。6 对电子的理想电子对几何构型为正八面体，两对孤对电子取相对位置以减少排斥，分子构型为平面正方形。<br>易错提醒：电子对几何构型是正八面体，分子构型才是平面正方形。"
+        },
+        {
+          id: "10-c5", section: "公式计算题", type: "calc", knowledge: "偶极矩计算",
+          prompt: "某极性分子的偶极电荷量 q=1.60×10⁻²⁰ C，偶极长 d=1.20×10⁻¹⁰ m。求偶极矩 μ，并换算为 Debye。已知 1 D=3.336×10⁻³⁰ C·m。",
+          answerText: "μ=1.92×10⁻³⁰ C·m≈0.576 D。", formula: "μ = qd",
+          explanation: "使用公式：μ=qd。<br>代入过程：μ=(1.60×10⁻²⁰)(1.20×10⁻¹⁰)=1.92×10⁻³⁰ C·m。<br>换算：μ=(1.92×10⁻³⁰)/(3.336×10⁻³⁰)=0.576 D。<br>最终答案：μ=1.92×10⁻³⁰ C·m≈0.576 D。<br>易错提醒：键长不一定等于偶极长；本题已直接给出 d。"
+        },
+        {
+          id: "10-j1", section: "判断题", type: "judge", knowledge: "离子键特点",
+          prompt: "离子键没有方向性和饱和性，因此离子晶体中异号离子的配位数主要受空间和半径比限制。",
+          answer: true, answerText: "正确",
+          explanation: "正确。离子键是静电作用，不限定固定方向和固定成键数，配位数主要受半径比与堆积空间限制。"
+        },
+        {
+          id: "10-j2", section: "判断题", type: "judge", knowledge: "离子半径规律",
+          prompt: "同一元素不同价态的正离子，电荷越高半径越大。",
+          answer: false, answerText: "错误",
+          explanation: "错误。同一元素不同价态正离子，电荷越高，对电子吸引越强，半径越小；如 Fe<sup>3+</sup>&lt;Fe<sup>2+</sup>。"
+        },
+        {
+          id: "10-j3", section: "判断题", type: "judge", knowledge: "八隅体规则",
+          prompt: "Lewis 八隅体规则可以严格解释所有主族元素化合物。",
+          answer: false, answerText: "错误",
+          explanation: "错误。八隅体规则有许多例外，如 PCl<sub>5</sub>、SF<sub>6</sub>、BeF<sub>2</sub>、BF<sub>3</sub>、NO、NO<sub>2</sub>。"
+        },
+        {
+          id: "10-j4", section: "判断题", type: "judge", knowledge: "价键理论",
+          prompt: "价键理论认为共价键形成的关键包括轨道重叠、自旋相反电子配对和体系能量降低。",
+          answer: true, answerText: "正确",
+          explanation: "正确。这正是价键理论对共价键本质的描述。"
+        },
+        {
+          id: "10-j5", section: "判断题", type: "judge", knowledge: "VSEPR 构型",
+          prompt: "在 VSEPR 中，H<sub>2</sub>O 的电子对几何构型和分子构型都叫正四面体。",
+          answer: false, answerText: "错误",
+          explanation: "错误。H<sub>2</sub>O 中 O 周围电子对几何构型为四面体，但分子构型为角形。"
+        },
+        {
+          id: "10-j6", section: "判断题", type: "judge", knowledge: "分子极性",
+          prompt: "CO<sub>2</sub> 含极性键，但因线形对称，键偶极抵消，所以分子偶极矩为 0。",
+          answer: true, answerText: "正确",
+          explanation: "正确。CO<sub>2</sub> 为线形，两个 C=O 键偶极大小相等、方向相反，合偶极矩为 0。"
+        },
+        {
+          id: "10-j7", section: "判断题", type: "judge", knowledge: "氢键",
+          prompt: "氢键的强度一般弱于化学键，但强于普通范德华力，并具有方向性和饱和性。",
+          answer: true, answerText: "正确",
+          explanation: "正确。氢键通常 10~40 kJ·mol⁻¹，比普通范德华力强，但弱于化学键，并且具有方向性、饱和性。"
+        },
+        {
+          id: "10-j8", section: "判断题", type: "judge", knowledge: "离子极化",
+          prompt: "离子极化越强，离子键的共价成分通常越小。",
+          answer: false, answerText: "错误",
+          explanation: "错误。离子极化越强，正负离子间电子云越偏向核间区域，共价成分通常增加。"
+        },
+        {
+          id: "10-s1", section: "综合题", type: "essay", knowledge: "杂化、VSEPR 与键角",
+          prompt: "结合价键理论、杂化轨道理论和 VSEPR，说明为什么 CH<sub>4</sub>、NH<sub>3</sub>、H<sub>2</sub>O 中心原子周围都可看作 4 对电子，但分子构型和键角不同。",
+          answerText: "CH<sub>4</sub> 为正四面体，键角约 109.5°；NH<sub>3</sub> 有 1 对孤对电子，为三角锥形，键角约 107.3°；H<sub>2</sub>O 有 2 对孤对电子，为角形，键角约 104.5°。差异来自孤对电子不参与分子构型表示且排斥更强。",
+          explanation: "价键理论认为共价键由轨道重叠和自旋相反电子配对形成。CH<sub>4</sub> 中 C 形成 4 个等性 sp<sup>3</sup> 杂化轨道，与 4 个 H 成键，4 对成键电子对互相排斥，采取四面体构型，键角约 109.5°。NH<sub>3</sub> 中 N 周围也近似 sp<sup>3</sup> 电子对分布，但有 1 对孤对电子，分子构型不画孤对，所以为三角锥形；lp-bp 排斥强于 bp-bp，使键角压缩到约 107.3°。H<sub>2</sub>O 中 O 有 2 对成键电子对和 2 对孤对电子，分子构型为角形，两个孤对电子排斥更强，使键角约 104.5°。"
+        },
+        {
+          id: "10-s2", section: "综合题", type: "essay", knowledge: "离子晶体结构与离子极化",
+          prompt: "结合半径比规则和离子极化，解释为什么 AB 型离子晶体可出现 CsCl 型、NaCl 型、ZnS 型等不同结构，并说明 AgF→AgI 为什么会出现键型和晶型变化。",
+          answerText: "AB 型离子晶体结构受 r<sub>+</sub>/r<sub>-</sub> 控制：大半径比倾向 CsCl 型，中等半径比倾向 NaCl 型，小半径比倾向 ZnS 型。但半径比规则是硬球近似，离子极化会增加共价成分并改变晶型。Ag<sup>+</sup> 为 d<sup>10</sup> 构型，遇到更易变形的 I<sup>-</sup> 时极化增强，AgX 键型由离子键向共价键过渡，晶型可由 NaCl 型转向 ZnS 型。",
+          explanation: "离子键没有方向性和饱和性，稳定结构倾向于让正、负离子尽可能接触并提高配位数，但受 r<sub>+</sub>/r<sub>-</sub> 限制。r<sub>+</sub>/r<sub>-</sub>&gt;0.732 时常见 CsCl 型，配位数 8:8；0.414~0.732 时常见 NaCl 型，配位数 6:6；0.225~0.414 时常见 ZnS 型，配位数 4:4。Ag<sup>+</sup> 为 d<sup>10</sup> 构型，极化能力和变形性较强；从 AgF 到 AgI，卤离子半径和变形性增大，正负离子间极化增强，键的共价成分增加，实际核间距越来越短于离子半径和，并可使晶体由 NaCl 型向 ZnS 型转变。"
+        }
+      ]
+    });
+
+    registerChapter({
+      id: "13",
+      title: "13 第十三章 有机化学与高分子化学",
+      source: "chemistry_quiz/13-quiz.md",
+      questions: [
+        {
+          id: "13-b1", section: "基础概念题", type: "fill", knowledge: "构造异构",
+          prompt: "构造异构是由于化合物具有不同的 ______ 而产生的同分异构现象。",
+          accepted: ["原子连接顺序", "连接顺序", "键连方式"],
+          answerText: "原子连接顺序。",
+          explanation: "构造异构也叫结构异构，关键是键连方式不同。"
+        },
+        {
+          id: "13-b2", section: "基础概念题", type: "choice", knowledge: "手性与构象",
+          prompt: "下列说法正确的是",
+          options: [["A", "季碳上可以连一个季氢"], ["B", "只含一个手性碳原子的分子一定是手性分子"], ["C", "顺反异构属于对映异构"], ["D", "重叠构象通常比交叉构象能量低"]],
+          answer: "B", answerText: "B. 只含一个手性碳原子的分子一定是手性分子",
+          explanation: "季碳连 4 个碳，没有季氢；顺反异构属于非对映异构；交叉构象通常能量低于重叠构象。"
+        },
+        {
+          id: "13-b3", section: "基础概念题", type: "fill", knowledge: "SN2 立体化学",
+          prompt: "S<sub>N</sub>2 反应中亲核体从离去基团的 ______ 进攻，产物构型发生 ______。",
+          accepted: ["背面", "翻转"], requireAllAccepted: true,
+          answerText: "背面；翻转。",
+          explanation: "S<sub>N</sub>2 背面进攻导致 Walden 反转。"
+        },
+        {
+          id: "13-b4", section: "基础概念题", type: "choice", knowledge: "溶剂效应",
+          prompt: "极性非质子性溶剂通常更有利于",
+          options: [["A", "S<sub>N</sub>2"], ["B", "S<sub>N</sub>1"], ["C", "形成外消旋体"], ["D", "碳正离子长期稳定存在"]],
+          answer: "A", answerText: "A. S<sub>N</sub>2",
+          explanation: "极性非质子性溶剂不容易紧密包裹亲核体，有利于 S<sub>N</sub>2。"
+        },
+        {
+          id: "13-b5", section: "基础概念题", type: "fill", knowledge: "马氏规则",
+          prompt: "烯烃与氢卤酸加成时，按马氏规则，H 原子通常加到含氢较 ______ 的双键碳上。",
+          accepted: ["多", "多的", "较多"],
+          answerText: "多。",
+          explanation: "马氏规则常用口诀是“氢多加氢”，即 H 加到原来 H 较多的双键碳上。"
+        },
+        {
+          id: "13-b6", section: "基础概念题", type: "choice", knowledge: "缩聚反应",
+          prompt: "下列关于缩聚反应的说法正确的是",
+          options: [["A", "一定没有小分子副产物"], ["B", "链节组成总与单体完全相同"], ["C", "通常是逐步聚合反应"], ["D", "典型产物一定是碳链聚合物"]],
+          answer: "C", answerText: "C. 通常是逐步聚合反应",
+          explanation: "缩聚反应通常伴随小分子副产物生成，是典型逐步聚合反应，所得聚合物多为杂链聚合物。"
+        },
+        {
+          id: "13-b7", section: "基础概念题", type: "fill", knowledge: "分散系数",
+          prompt: "高分子分子量分布指数公式为 D=______，D 越接近 1，分子量分布越 ______。",
+          accepted: ["Mw/Mn", "M_w/M_n", "窄"], requireAllAccepted: true,
+          answerText: "D=M<sub>w</sub>/M<sub>n</sub>；窄。",
+          explanation: "D≥1，越接近 1 说明分子量越均一。"
+        },
+        {
+          id: "13-b8", section: "基础概念题", type: "choice", knowledge: "玻璃化转变",
+          prompt: "非晶态高分子在 T<sub>g</sub> 以下通常处于",
+          options: [["A", "玻璃态"], ["B", "高弹态"], ["C", "粘流态"], ["D", "熔融晶态"]],
+          answer: "A", answerText: "A. 玻璃态",
+          explanation: "非晶态高分子在 T<sub>g</sub> 以下链段运动受限，表现为硬而脆的玻璃态。"
+        },
+        {
+          id: "13-c1", section: "公式计算题", type: "calc", knowledge: "单烯烃通式",
+          prompt: "某开链单烯烃含 6 个碳原子，求其分子式。",
+          answerText: "C<sub>6</sub>H<sub>12</sub>。", formula: "C_nH_{2n}",
+          explanation: "使用公式：开链单烯烃通式为 C<sub>n</sub>H<sub>2n</sub>。<br>代入过程：n=6，H=2n=12。<br>最终答案：C<sub>6</sub>H<sub>12</sub>。<br>易错提醒：若是开链烷烃才用 C<sub>n</sub>H<sub>2n+2</sub>。"
+        },
+        {
+          id: "13-c2", section: "公式计算题", type: "calc", knowledge: "辛烷值",
+          prompt: "某汽油抗爆性相当于 92 mL 异辛烷与 8 mL 正庚烷组成的标准混合物，求其辛烷值。",
+          answerText: "辛烷值为 92。", formula: "辛烷值 = V_异辛烷/(V_异辛烷+V_正庚烷) × 100",
+          explanation: "使用公式：辛烷值=异辛烷体积分数×100。<br>代入过程：辛烷值=92/(92+8)×100=92。<br>最终答案：92。<br>易错提醒：正庚烷辛烷值为 0，不是把两者体积直接相加后再乘别的系数。"
+        },
+        {
+          id: "13-c3", section: "公式计算题", type: "calc", knowledge: "构象扭转能",
+          prompt: "乙烷完全重叠构象中有 3 对 C-H 重叠相互作用，每对约贡献 4 kJ·mol⁻¹ 扭转能。估算该构象相对交叉构象升高的能量。",
+          answerText: "约 12 kJ·mol⁻¹。", formula: "E = ΣE_i",
+          explanation: "总扭转能为各重叠相互作用贡献之和。<br>代入过程：E=3×4=12 kJ·mol⁻¹。<br>最终答案：约 12 kJ·mol⁻¹。<br>易错提醒：重叠构象能量高，交叉构象能量低。"
+        },
+        {
+          id: "13-c4", section: "公式计算题", type: "calc", knowledge: "聚合度",
+          prompt: "某聚氯乙烯样品平均分子量为 1.25×10⁵ g·mol⁻¹，链节相对分子质量为 62.5，求平均聚合度。",
+          answerText: "平均聚合度 n=2000。", formula: "n = M/M0",
+          explanation: "使用公式：n=M/M<sub>0</sub>。<br>代入过程：n=(1.25×10⁵)/62.5=2000。<br>最终答案：n=2000。<br>易错提醒：单位保持一致；这里 M 和 M<sub>0</sub> 都按 g·mol⁻¹ 理解。"
+        },
+        {
+          id: "13-c5", section: "公式计算题", type: "calc", knowledge: "Mn、Mw 与分散系数",
+          prompt: "某聚合物样品中，分子量 1.0×10⁴ 的分子有 2 mol，分子量 1.0×10⁵ 的分子有 5 mol，分子量 1.0×10⁶ 的分子有 3 mol。求 M<sub>n</sub>、M<sub>w</sub> 和 D。",
+          answerText: "M<sub>n</sub>=3.52×10⁵ g·mol⁻¹，M<sub>w</sub>≈8.67×10⁵ g·mol⁻¹，D≈2.46。", formula: "M_n = ΣN_iM_i/ΣN_i；M_w = ΣN_iM_i²/ΣN_iM_i；D=M_w/M_n",
+          explanation: "先求 M<sub>n</sub>：M<sub>n</sub>=[2(10⁴)+5(10⁵)+3(10⁶)]/(2+5+3)=3.52×10⁵。<br>再求 M<sub>w</sub>：M<sub>w</sub>=[2(10⁴)²+5(10⁵)²+3(10⁶)²]/[2(10⁴)+5(10⁵)+3(10⁶)]=8.67×10⁵。<br>D=M<sub>w</sub>/M<sub>n</sub>=8.67×10⁵/3.52×10⁵=2.46。<br>易错提醒：M<sub>w</sub> 不是简单平均，要用 N<sub>i</sub>M<sub>i</sub>² 作分子。"
+        },
+        {
+          id: "13-j1", section: "判断题", type: "judge", knowledge: "构象异构",
+          prompt: "构象异构通常由单键旋转产生，不需要改变原子的连接顺序。",
+          answer: true, answerText: "正确",
+          explanation: "正确。构象异构来自单键旋转，原子连接顺序不变。"
+        },
+        {
+          id: "13-j2", section: "判断题", type: "judge", knowledge: "手性",
+          prompt: "分子有一个手性碳时一定不具有旋光性。",
+          answer: false, answerText: "错误",
+          explanation: "错误。材料强调只含一个手性碳原子的分子一定是手性分子，通常具有旋光性。"
+        },
+        {
+          id: "13-j3", section: "判断题", type: "judge", knowledge: "芳香性",
+          prompt: "芳香化合物通常易进行亲电取代反应，不易进行加成反应和氧化反应。",
+          answer: true, answerText: "正确",
+          explanation: "正确。芳香性体系稳定，典型反应倾向为亲电取代而不是加成。"
+        },
+        {
+          id: "13-j4", section: "判断题", type: "judge", knowledge: "SN1 机理",
+          prompt: "S<sub>N</sub>1 反应的决速步骤是亲核体和底物同时发生碰撞并形成过渡态。",
+          answer: false, answerText: "错误",
+          explanation: "错误。这是 S<sub>N</sub>2 的特点；S<sub>N</sub>1 的决速步骤是离去基团先离去形成碳正离子。"
+        },
+        {
+          id: "13-j5", section: "判断题", type: "judge", knowledge: "位阻与SN2",
+          prompt: "位阻越大，S<sub>N</sub>2 反应通常越慢。",
+          answer: true, answerText: "正确",
+          explanation: "正确。位阻越大，亲核体背面进攻越困难，S<sub>N</sub>2 反应速率越慢。"
+        },
+        {
+          id: "13-j6", section: "判断题", type: "judge", knowledge: "加聚反应",
+          prompt: "加聚反应通常无小分子副产物，所得聚合物链节与单体具有完全一致的化学成分与结构。",
+          answer: true, answerText: "正确",
+          explanation: "正确。加聚通常是双键或三键打开后链式聚合，无小分子副产物，链节组成与单体一致。"
+        },
+        {
+          id: "13-j7", section: "判断题", type: "judge", knowledge: "自由基聚合",
+          prompt: "自由基聚合可概括为慢引发、快增长、速终止。",
+          answer: true, answerText: "正确",
+          explanation: "正确。自由基聚合包括链引发、链增长、链终止，机理特征为慢引发、快增长、速终止。"
+        },
+        {
+          id: "13-j8", section: "判断题", type: "judge", knowledge: "链结构与热性能",
+          prompt: "线型高分子一般可溶可熔，深度交联体型高分子通常不溶不熔。",
+          answer: true, answerText: "正确",
+          explanation: "正确。线型高分子链可相对运动，常可溶可熔；深度交联体型高分子形成网状结构，通常不溶不熔。"
+        },
+        {
+          id: "13-s1", section: "综合题", type: "essay", knowledge: "SN1 与 SN2 比较",
+          prompt: "从底物结构、碳正离子稳定性、位阻和溶剂角度，比较 S<sub>N</sub>1 与 S<sub>N</sub>2 的机理差异，并说明它们的立体化学结果为什么不同。",
+          answerText: "S<sub>N</sub>2 一步协同、背面进攻、构型翻转，小位阻底物、强亲核体和极性非质子性溶剂有利；S<sub>N</sub>1 分步进行，先生成平面碳正离子，常外消旋，稳定碳正离子底物和极性质子性溶剂有利。",
+          explanation: "S<sub>N</sub>2 是双分子亲核取代，决速步骤中亲核体和底物同时参与。亲核体从离去基团背面进攻，成键和断键同时发生，因此手性中心发生构型翻转。小位阻底物、强亲核体、极性非质子性溶剂有利于 S<sub>N</sub>2。S<sub>N</sub>1 是单分子亲核取代，第一步离去基团先离去形成碳正离子，这是慢步骤。碳正离子为平面 sp<sup>2</sup> 结构，亲核体可以从平面两侧进攻，因此常得到两个对映体近似 1:1 的外消旋产物。"
+        },
+        {
+          id: "13-s2", section: "综合题", type: "essay", knowledge: "聚合反应与高分子结构性能",
+          prompt: "比较缩聚反应和加聚反应，并结合高分子链结构说明为什么线型聚合物通常具有热塑性，而深度交联的体型聚合物具有热固性。",
+          answerText: "缩聚通常由多官能团单体逐步反应并放出小分子，链节组成常不同于单体；加聚由不饱和单体打开 π 键链式聚合，无小分子副产物，链节组成通常与单体一致。线型链可运动，可溶可熔，表现热塑性；深度交联体型高分子形成三维网状结构，不溶不熔，表现热固性。",
+          explanation: "缩聚反应通常由含两个或两个以上官能团的单体逐步反应形成聚合物，并放出水、醇、胺等小分子副产物。加聚反应则多由含 C=C 或 C≡C 的单体通过 π 键断裂加成聚合，无小分子副产物，常为连锁聚合。高分子性能还取决于链结构：线型或支链型高分子分子链之间没有永久化学交联，受热时链段和分子链可运动，通常可溶可熔，表现热塑性；深度交联体型高分子由化学键连接成三维网状结构，分子链不能自由滑移，受热不熔而分解，通常不溶不熔，表现热固性。"
+        }
+      ]
+    });
+
+    let currentChapterId = "01";
+    let currentSection = "全部";
+    let mode = "practice";
+    let examSubmitted = false;
+
+    function newState() {
+      return { answers: {}, done: {}, graded: {}, correct: {}, wrong: {} };
+    }
+    function state() {
+      if (!stateByChapter[currentChapterId]) stateByChapter[currentChapterId] = newState();
+      return stateByChapter[currentChapterId];
+    }
+    function currentChapter() {
+      return quizBank.find(ch => ch.id === currentChapterId) || quizBank[0];
+    }
+    function currentQuestions() {
+      const qs = currentChapter().questions;
+      return currentSection === "全部" ? qs : qs.filter(q => q.section === currentSection);
+    }
+    function registerChapter(chapter) {
+      const idx = quizBank.findIndex(ch => ch.id === chapter.id);
+      if (idx >= 0) quizBank[idx] = chapter;
+      else quizBank.push(chapter);
+      if (!stateByChapter[chapter.id]) stateByChapter[chapter.id] = newState();
+    }
+    function registerQuestionSet(chapter) {
+      registerChapter(chapter);
+      refreshChapterSelect();
+      render();
+    }
+
+    function resetCurrentChapter() {
+      stateByChapter[currentChapterId] = newState();
+      examSubmitted = false;
+      document.getElementById("examResult").classList.add("hidden");
+      render();
+    }
+    function normalize(v) {
+      return String(v || "").toLowerCase().replace(/\s+/g, "").replace(/[，。；;,.、]/g, "");
+    }
+    function checkFill(q, value) {
+      if (!q.accepted) return null;
+      const txt = normalize(value);
+      if (q.requireAllAccepted) return q.accepted.every(x => txt.includes(normalize(x)));
+      return q.accepted.some(x => txt.includes(normalize(x)));
+    }
+    function typeLabel(t) {
+      return { choice: "选择题", fill: "填空题", judge: "判断题", calc: "计算题", essay: "综合题" }[t] || "题目";
+    }
+    function escapeHtml(v) {
+      return String(v || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function setMode(next) {
+      mode = next;
+      examSubmitted = false;
+      document.getElementById("practiceBtn").classList.toggle("active", mode === "practice");
+      document.getElementById("examBtn").classList.toggle("active", mode === "exam");
+      document.getElementById("submitAllBtn").classList.toggle("hidden", mode !== "exam");
+      document.getElementById("modeHint").textContent = mode === "practice"
+        ? "练习模式：每题提交后立即显示对错，可以随时查看解析。"
+        : "考试模式：作答过程中不显示答案和解析，点击提交全部后统一显示。";
+      document.getElementById("examResult").classList.add("hidden");
+      render();
+    }
+    function setSection(section) {
+      currentSection = section;
+      render();
+    }
+    function mark(q, isCorrect, userAnswer, reason) {
+      const s = state();
+      s.answers[q.id] = userAnswer;
+      s.done[q.id] = true;
+      s.graded[q.id] = true;
+      s.correct[q.id] = Boolean(isCorrect);
+      if (!isCorrect) {
+        s.wrong[q.id] = {
+          q,
+          userAnswer: userAnswer || "未作答",
+          correctAnswer: q.answerText,
+          reason: reason || q.explanation,
+          knowledge: q.knowledge
+        };
+      } else {
+        delete s.wrong[q.id];
+      }
+      updateStats();
+      updateWrongSummary();
+    }
+    function answerChoice(id, key) {
+      const q = currentChapter().questions.find(x => x.id === id);
+      state().answers[id] = key;
+      if (mode === "practice") mark(q, key === q.answer, key, key === q.answer ? "" : "选项不符合本章材料中的结论。");
+      render();
+    }
+    function answerJudge(id, value) {
+      const q = currentChapter().questions.find(x => x.id === id);
+      state().answers[id] = value;
+      if (mode === "practice") mark(q, value === q.answer, value ? "正确" : "错误", value === q.answer ? "" : "判断与本章材料结论相反。");
+      render();
+    }
+    function submitFill(id) {
+      const q = currentChapter().questions.find(x => x.id === id);
+      const input = document.querySelector(`[data-answer="${id}"]`);
+      const value = input ? input.value.trim() : "";
+      state().answers[id] = value;
+      const result = checkFill(q, value);
+      if (result === null) {
+        showFeedback(id, "neutral", "这道题不做严格自动判分，请查看参考答案后自行标记。");
+        showAnswer(id);
+      } else {
+        mark(q, result, value || "空白", result ? "" : "答案缺少关键点。");
+        render();
+      }
+    }
+    function showAnswer(id) {
+      const box = document.getElementById(`answer-${id}`);
+      if (box) box.classList.add("show");
+      const details = document.getElementById(`details-${id}`);
+      if (details && mode === "practice") details.open = true;
+    }
+    function markSubjective(id, isCorrect) {
+      const q = currentChapter().questions.find(x => x.id === id);
+      const input = document.querySelector(`[data-answer="${id}"]`);
+      const value = input ? input.value.trim() : "已查看参考答案";
+      mark(q, isCorrect, value || "已查看参考答案", isCorrect ? "" : "主观题自评为错误，请对照参考答案补足关键点。");
+      render();
+    }
+    function showFeedback(id, cls, html) {
+      const el = document.getElementById(`feedback-${id}`);
+      if (!el) return;
+      el.className = `feedback show ${cls}`;
+      el.innerHTML = html;
+    }
+
+    function refreshChapterSelect() {
+      const sel = document.getElementById("chapterSelect");
+      sel.innerHTML = quizBank.map(ch => `<option value="${ch.id}">${ch.title}</option>`).join("");
+      sel.value = currentChapterId;
+    }
+    function renderSectionBar() {
+      const sections = ["全部", ...new Set(currentChapter().questions.map(q => q.section))];
+      document.getElementById("sectionBar").innerHTML = sections.map(sec => {
+        const count = sec === "全部" ? currentChapter().questions.length : currentChapter().questions.filter(q => q.section === sec).length;
+        return `<button type="button" class="${currentSection === sec ? "active" : ""}" onclick="setSection('${sec}')">${sec}（${count}）</button>`;
+      }).join("");
+    }
+    function render() {
+      refreshChapterSelect();
+      renderSectionBar();
+      const root = document.getElementById("quizRoot");
+      const questions = currentQuestions();
+      const groups = [...new Set(questions.map(q => q.section))];
+      root.innerHTML = groups.map(group => {
+        const cards = questions.filter(q => q.section === group).map(q => renderCard(q, currentChapter().questions.indexOf(q) + 1)).join("");
+        return `<h2>${group}</h2>${cards}`;
+      }).join("") || `<div class="notice">当前筛选下没有题目。</div>`;
+      questions.forEach(updateCardState);
+      updateStats();
+      updateWrongSummary();
+    }
+    function renderCard(q, num) {
+      const s = state();
+      const wrongTag = s.wrong[q.id] ? `<span class="tag wrong-tag">错题</span>` : "";
+      return `
+        <article id="card-${q.id}" class="card ${s.wrong[q.id] ? "wrong" : ""}">
+          <div class="q-head">
+            <span class="q-no">第 ${num} 题</span>
+            <span class="tag">${typeLabel(q.type)}</span>
+            <span class="tag">${q.knowledge}</span>
+            ${wrongTag}
+          </div>
+          <div class="question">${q.prompt}</div>
+          ${renderInput(q)}
+          <div id="feedback-${q.id}" class="feedback"></div>
+          <div id="answer-${q.id}" class="answer-box">
+            <b>参考答案：</b>
+            <div>${q.answerText}</div>
+            ${q.formula ? `<div class="formula">${q.formula}</div>` : ""}
+            ${needsSelfGrade(q) && mode === "practice" ? `<div class="self-row"><button class="good" onclick="markSubjective('${q.id}', true)">我答对了</button><button class="bad" onclick="markSubjective('${q.id}', false)">我答错了</button></div>` : ""}
+          </div>
+          <details id="details-${q.id}" class="${mode === "exam" && !examSubmitted ? "hidden" : ""}">
+            <summary>查看解析</summary>
+            <div class="analysis">${q.formula ? `<div class="formula">${q.formula}</div>` : ""}${q.explanation}</div>
+          </details>
+        </article>
+      `;
+    }
+    function needsSelfGrade(q) {
+      return q.type === "calc" || q.type === "essay" || (q.type === "fill" && !q.accepted);
+    }
+    function renderInput(q) {
+      const s = state();
+      if (q.type === "choice") {
+        return `<div class="options">${q.options.map(([k, txt]) => `<button type="button" class="option" data-option="${k}" onclick="answerChoice('${q.id}', '${k}')">${k}. ${txt}</button>`).join("")}</div>`;
+      }
+      if (q.type === "judge") {
+        return `<div class="judge-row"><button type="button" data-judge="true" onclick="answerJudge('${q.id}', true)">正确</button><button type="button" data-judge="false" onclick="answerJudge('${q.id}', false)">错误</button></div>`;
+      }
+      if (q.type === "fill") {
+        return `<input data-answer="${q.id}" value="${escapeHtml(s.answers[q.id] || "")}" placeholder="输入答案" oninput="state().answers['${q.id}']=this.value">
+          <div class="actions ${mode === "exam" && !examSubmitted ? "hidden" : ""}">
+            <button class="primary" type="button" onclick="submitFill('${q.id}')">提交</button>
+            <button type="button" onclick="showAnswer('${q.id}')">显示参考答案</button>
+          </div>`;
+      }
+      return `<textarea data-answer="${q.id}" placeholder="先自己作答，再查看参考答案" oninput="state().answers['${q.id}']=this.value">${escapeHtml(s.answers[q.id] || "")}</textarea>
+        <div class="actions ${mode === "exam" && !examSubmitted ? "hidden" : ""}">
+          <button class="primary" type="button" onclick="showAnswer('${q.id}')">${q.type === "calc" ? "显示答案与解析" : "显示参考答案"}</button>
+        </div>`;
+    }
+    function updateCardState(q) {
+      const s = state();
+      const card = document.getElementById(`card-${q.id}`);
+      if (!card) return;
+      card.classList.toggle("wrong", Boolean(s.wrong[q.id]));
+      if (q.type === "choice") {
+        card.querySelectorAll("[data-option]").forEach(btn => {
+          const key = btn.dataset.option;
+          btn.classList.remove("selected", "correct", "incorrect");
+          if (s.answers[q.id] === key) btn.classList.add("selected");
+          if ((mode === "practice" && s.done[q.id]) || examSubmitted) {
+            if (key === q.answer) btn.classList.add("correct");
+            if (s.answers[q.id] === key && key !== q.answer) btn.classList.add("incorrect");
+          }
+        });
+      }
+      if (q.type === "judge") {
+        card.querySelectorAll("[data-judge]").forEach(btn => {
+          const value = btn.dataset.judge === "true";
+          btn.classList.remove("active", "good", "bad");
+          if (s.answers[q.id] === value) btn.classList.add("active");
+          if ((mode === "practice" && s.done[q.id]) || examSubmitted) {
+            if (value === q.answer) btn.classList.add("good");
+            if (s.answers[q.id] === value && value !== q.answer) btn.classList.add("bad");
+          }
+        });
+      }
+      if ((mode === "practice" && s.graded[q.id]) || (examSubmitted && s.graded[q.id])) {
+        showFeedback(q.id, s.correct[q.id] ? "correct" : "incorrect", s.correct[q.id] ? `回答正确。正确答案：${q.answerText}` : `回答错误。正确答案：${q.answerText}`);
+      } else if (examSubmitted) {
+        showFeedback(q.id, "neutral", `参考答案：${q.answerText}`);
+      }
+      if (examSubmitted) {
+        const ans = document.getElementById(`answer-${q.id}`);
+        if (ans) ans.classList.add("show");
+        const details = document.getElementById(`details-${q.id}`);
+        if (details) details.open = true;
+      }
+    }
+    function updateStats() {
+      const s = state();
+      const qs = currentQuestions();
+      const total = qs.length;
+      const done = qs.filter(q => s.done[q.id] || (s.answers[q.id] !== undefined && String(s.answers[q.id]).trim() !== "")).length;
+      const graded = qs.filter(q => s.graded[q.id]).length;
+      const correct = qs.filter(q => s.correct[q.id]).length;
+      document.getElementById("statTotal").textContent = total;
+      document.getElementById("statDone").textContent = done;
+      document.getElementById("statCorrect").textContent = correct;
+      document.getElementById("statRate").textContent = graded ? `${Math.round(correct / graded * 100)}%` : "0%";
+    }
+    function updateWrongSummary() {
+      const s = state();
+      const items = Object.values(s.wrong).filter(item => currentQuestions().some(q => q.id === item.q.id));
+      const box = document.getElementById("wrongSummary");
+      if (!items.length) {
+        box.innerHTML = `<div class="notice">当前章节/筛选下暂无错题。</div>`;
+        return;
+      }
+      box.innerHTML = items.map(item => {
+        const num = currentChapter().questions.findIndex(q => q.id === item.q.id) + 1;
+        return `<div class="wrong-item">
+          <b>第 ${num} 题｜${typeLabel(item.q.type)}｜${item.knowledge}</b>
+          <p><b>题干：</b>${item.q.prompt}</p>
+          <p><b>我的答案：</b>${escapeHtml(item.userAnswer)}</p>
+          <p><b>正确答案：</b>${item.correctAnswer}</p>
+          <p><b>错误原因：</b>${item.reason}</p>
+          <p><b>对应知识点：</b>${item.knowledge}</p>
+        </div>`;
+      }).join("");
+    }
+    function submitAll() {
+      examSubmitted = true;
+      const s = state();
+      currentQuestions().forEach(q => {
+        const user = s.answers[q.id];
+        s.done[q.id] = true;
+        if (q.type === "choice") mark(q, user === q.answer, user || "未作答", "考试模式自动判分。");
+        if (q.type === "judge") mark(q, user === q.answer, user === undefined ? "未作答" : (user ? "正确" : "错误"), "考试模式自动判分。");
+        if (q.type === "fill" && q.accepted) {
+          const ok = checkFill(q, user || "");
+          mark(q, ok, user || "未作答", "填空题缺少关键点。");
+        }
+      });
+      const autoQs = currentQuestions().filter(q => q.type === "choice" || q.type === "judge" || (q.type === "fill" && q.accepted));
+      const autoCorrect = autoQs.filter(q => state().correct[q.id]).length;
+      const rate = autoQs.length ? Math.round(autoCorrect / autoQs.length * 100) : 0;
+      document.getElementById("examResult").classList.remove("hidden");
+      document.getElementById("examResult").innerHTML = `<h2 style="margin-top:0">考试模式结果</h2><p><b>自动判分：</b>${autoCorrect} / ${autoQs.length}，正确率 ${rate}%。</p><p class="muted">计算题和综合题已展开参考答案，请自行订正，不计入自动分数。</p>`;
+      render();
+      document.getElementById("examResult").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    function parseMarkdownSkeleton(markdown, meta = {}) {
+      const lines = String(markdown || "").split(/\r?\n/);
+      let section = "未分类";
+      const questions = [];
+      lines.forEach((line, idx) => {
+        const h = line.match(/^##\s+(.+)/);
+        if (h) section = h[1].trim();
+        const q = line.match(/^\s*(\d+)\.\s+(.+)/);
+        if (q) questions.push({ id: `${meta.id || "new"}-${idx}`, section, type: "fill", knowledge: "待补充", prompt: q[2], answerText: "待补充", explanation: "待补充" });
+      });
+      return { id: meta.id || "new", title: meta.title || "新章节", source: meta.source || "markdown", questions };
+    }
+    function previewMarkdown() {
+      const chapter = parseMarkdownSkeleton(document.getElementById("markdownInput").value);
+      const box = document.getElementById("markdownPreview");
+      box.className = "feedback neutral show";
+      box.innerHTML = chapter.questions.length ? `可识别到 ${chapter.questions.length} 道编号题。当前预留功能只做结构识别；完整导入需补充答案、解析和题型。` : "暂未识别到编号题。";
+    }
+
+    document.getElementById("chapterSelect").addEventListener("change", e => {
+      currentChapterId = e.target.value;
+      currentSection = "全部";
+      examSubmitted = false;
+      document.getElementById("examResult").classList.add("hidden");
+      render();
+    });
+    document.getElementById("practiceBtn").addEventListener("click", () => setMode("practice"));
+    document.getElementById("examBtn").addEventListener("click", () => setMode("exam"));
+    document.getElementById("submitAllBtn").addEventListener("click", submitAll);
+    document.getElementById("resetBtn").addEventListener("click", resetCurrentChapter);
+    document.getElementById("previewMarkdownBtn").addEventListener("click", previewMarkdown);
+
+    window.registerChapter = registerChapter;
+    window.registerQuestionSet = registerQuestionSet;
+    window.parseMarkdownSkeleton = parseMarkdownSkeleton;
+    refreshChapterSelect();
+    render();
+  </script>
+</body>
+</html>
