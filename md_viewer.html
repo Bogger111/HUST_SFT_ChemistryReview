@@ -4,6 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Markdown 资料浏览</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [["\\(", "\\)"], ["$", "$"]],
+        displayMath: [["\\[", "\\]"], ["$$", "$$"]],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
   <style>
     :root {
       --bg: #f6f8fb;
@@ -219,11 +232,6 @@
       font-weight: 700;
     }
 
-    .math {
-      font-family: Consolas, "SFMono-Regular", monospace;
-      white-space: pre-wrap;
-    }
-
     .error {
       border: 1px solid #fecaca;
       border-radius: 8px;
@@ -319,7 +327,6 @@
         .replace(/`([^`]+)`/g, "<code>$1</code>")
         .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
         .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-        .replace(/\$([^$]+)\$/g, '<span class="math">$1</span>')
         .replace(/&lt;(\/?details)&gt;/g, "<$1>")
         .replace(/&lt;summary&gt;([^<]+)&lt;\/summary&gt;/g, "<summary>$1</summary>");
     }
@@ -464,6 +471,9 @@
         }
         const markdown = await response.text();
         content.innerHTML = renderMarkdown(markdown);
+        if (window.MathJax && window.MathJax.typesetPromise) {
+          await window.MathJax.typesetPromise([content]);
+        }
       } catch (error) {
         content.innerHTML = `<div class="error">无法读取这个 Markdown 文件：${escapeHtml(error.message)}</div>`;
       }
