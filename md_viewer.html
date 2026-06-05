@@ -345,6 +345,53 @@
       background: #1d303c;
     }
 
+    .markdown .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .markdown table {
+      width: 100%;
+      min-width: 560px;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 14px;
+    }
+
+    :root[data-theme="dark"] .markdown table {
+      background: #182630;
+    }
+
+    .markdown th,
+    .markdown td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      padding: 9px 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .markdown th:last-child,
+    .markdown td:last-child {
+      border-right: 0;
+    }
+
+    .markdown tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .markdown thead th {
+      background: var(--primary-soft);
+      color: #113957;
+      font-weight: 850;
+    }
+
+    :root[data-theme="dark"] .markdown thead th {
+      color: #d7f0fb;
+    }
+
     .markdown details {
       margin: 14px 0;
       border: 1px solid var(--line);
@@ -526,6 +573,42 @@
         .replace(/&lt;summary&gt;([^<]+)&lt;\/summary&gt;/g, "<summary>$1</summary>");
     }
 
+    function splitTableRow(row) {
+      const trimmed = row.trim().replace(/^\|/, "").replace(/\|$/, "");
+      return trimmed.split(/(?<!\\)\|/).map(cell => cell.replace(/\\\|/g, "|").trim());
+    }
+
+    function parseTableAlignments(row) {
+      const cells = splitTableRow(row);
+      if (!cells.length) return null;
+      const alignments = [];
+      for (const cell of cells) {
+        if (!/^:?-{3,}:?$/.test(cell)) return null;
+        if (cell.startsWith(":") && cell.endsWith(":")) {
+          alignments.push("center");
+        } else if (cell.endsWith(":")) {
+          alignments.push("right");
+        } else {
+          alignments.push("left");
+        }
+      }
+      return alignments;
+    }
+
+    function renderTable(headers, alignments, rows) {
+      const alignAttr = align => align && align !== "left" ? ` style="text-align: ${align}"` : "";
+      const head = headers.map((cell, index) => {
+        return `<th${alignAttr(alignments[index])}>${renderInline(cell)}</th>`;
+      }).join("");
+      const body = rows.map(row => {
+        const cells = headers.map((_, index) => {
+          return `<td${alignAttr(alignments[index])}>${renderInline(row[index] || "")}</td>`;
+        }).join("");
+        return `<tr>${cells}</tr>`;
+      }).join("");
+      return `<div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+    }
+
     function renderMarkdown(markdown) {
       const lines = markdown.replace(/\r\n/g, "\n").split("\n");
       const html = [];
@@ -552,7 +635,8 @@
         }
       }
 
-      for (const line of lines) {
+      for (let index = 0; index < lines.length; index += 1) {
+        const line = lines[index];
         if (line.trim().startsWith("```")) {
           closeParagraph();
           closeLists();
@@ -567,6 +651,7 @@
         }
 
         const trimmed = line.trim();
+        const nextTrimmed = (lines[index + 1] || "").trim();
         if (!trimmed) {
           closeParagraph();
           closeLists();
@@ -586,6 +671,24 @@
           closeParagraph();
           closeLists();
           html.push(renderInline(trimmed));
+          continue;
+        }
+
+        const tableAlignments = parseTableAlignments(nextTrimmed);
+        if (trimmed.includes("|") && tableAlignments) {
+          const headers = splitTableRow(trimmed);
+          const rows = [];
+          index += 2;
+          while (index < lines.length) {
+            const row = lines[index].trim();
+            if (!row || !row.includes("|")) break;
+            rows.push(splitTableRow(row));
+            index += 1;
+          }
+          index -= 1;
+          closeParagraph();
+          closeLists();
+          html.push(renderTable(headers, tableAlignments, rows));
           continue;
         }
 
