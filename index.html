@@ -6,124 +6,328 @@
   <title>大学化学复习资料</title>
   <style>
     :root {
-      --bg: #f6f8fb;
-      --panel: #ffffff;
-      --text: #172033;
-      --muted: #64748b;
-      --line: #d8e0ea;
-      --primary: #2563eb;
-      --primary-soft: #eff6ff;
-      --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+      --bg: #f3fbff;
+      --bg-deep: #e9f7fc;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-solid: #ffffff;
+      --text: #203949;
+      --muted: #6f8796;
+      --line: #d4edf7;
+      --primary: #7bbfe5;
+      --primary-dark: #4f9bc8;
+      --primary-soft: #eef9fd;
+      --accent: #b8e1f1;
+      --shadow: 0 18px 45px rgba(115, 176, 210, 0.14);
+      --radius: 8px;
+      color-scheme: light;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #101820;
+      --bg-deep: #172631;
+      --panel: rgba(24, 36, 46, 0.9);
+      --panel-solid: #182630;
+      --text: #e8f5fb;
+      --muted: #9fb6c4;
+      --line: #314957;
+      --primary: #93cfe8;
+      --primary-dark: #bde8f6;
+      --primary-soft: #223744;
+      --accent: #79bddb;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.32);
+      color-scheme: dark;
     }
 
     * { box-sizing: border-box; }
 
+    html { scroll-behavior: smooth; }
+
     body {
       margin: 0;
-      background: var(--bg);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(202, 235, 248, 0.72), transparent 30%),
+        linear-gradient(145deg, var(--bg) 0%, #f9fdff 48%, var(--bg-deep) 100%);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
       line-height: 1.65;
     }
 
+    :root[data-theme="dark"] body {
+      background:
+        radial-gradient(circle at 12% 12%, rgba(90, 137, 156, 0.22), transparent 30%),
+        linear-gradient(145deg, var(--bg) 0%, #0f171e 48%, var(--bg-deep) 100%);
+    }
+
+    a { color: inherit; }
+
     .wrap {
-      width: min(960px, calc(100% - 28px));
+      width: min(1120px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 32px 0 48px;
+      padding: 34px 0 54px;
     }
 
     header {
-      margin-bottom: 20px;
+      display: grid;
+      gap: 22px;
+      padding: clamp(22px, 4vw, 36px);
+      border: 1px solid rgba(195, 229, 242, 0.9);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(238, 249, 253, 0.86));
+      box-shadow: var(--shadow);
+    }
+
+    :root[data-theme="dark"] header {
+      border-color: rgba(73, 105, 121, 0.78);
+      background: linear-gradient(135deg, rgba(28, 43, 54, 0.96), rgba(19, 31, 40, 0.9));
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--primary-dark);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0;
     }
 
     h1 {
-      margin: 0 0 8px;
-      font-size: clamp(26px, 4vw, 40px);
+      margin: 0;
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.1;
       letter-spacing: 0;
     }
 
     p {
-      margin: 0;
+      margin: 10px 0 0;
       color: var(--muted);
+      font-size: 16px;
     }
 
-    .primary {
-      display: inline-block;
-      margin: 22px 0 28px;
-      padding: 11px 16px;
-      border-radius: 8px;
-      background: var(--primary);
-      color: #fff;
-      font-weight: 700;
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      background: var(--panel-solid);
+      color: var(--text);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(115, 176, 210, 0.12);
+    }
+
+    .theme-toggle:hover,
+    .theme-toggle:focus-visible {
+      border-color: var(--accent);
+      background: var(--primary-soft);
+      outline: none;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      background: var(--panel-solid);
+      color: var(--text);
+      font-weight: 800;
       text-decoration: none;
+      box-shadow: 0 8px 22px rgba(115, 176, 210, 0.12);
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      border-color: var(--accent);
+      background: var(--primary-soft);
+      outline: none;
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(115, 176, 210, 0.18);
+    }
+
+    .button.primary {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #8ecae6, #bfe8f5);
+      color: #fff;
+    }
+
+    :root[data-theme="dark"] .button.primary {
+      color: #10202a;
     }
 
     section {
+      margin-top: 20px;
+      border: 1px solid rgba(195, 229, 242, 0.9);
+      border-radius: var(--radius);
       background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
       box-shadow: var(--shadow);
-      padding: 18px;
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    :root[data-theme="dark"] section {
+      border-color: rgba(73, 105, 121, 0.78);
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(243, 251, 255, 0.82);
+    }
+
+    :root[data-theme="dark"] .section-head {
+      background: rgba(28, 43, 54, 0.78);
     }
 
     h2 {
-      margin: 0 0 12px;
+      margin: 0;
       font-size: 20px;
       letter-spacing: 0;
     }
 
+    .count {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     .links {
       display: grid;
-      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
       margin: 0;
-      padding: 0;
+      padding: 16px;
       list-style: none;
     }
 
     .links a {
-      display: block;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px 12px;
-      background: #fff;
-      color: var(--text);
+      display: grid;
+      gap: 4px;
+      min-height: 82px;
+      border: 1px solid #d8eff8;
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      background: rgba(255, 255, 255, 0.9);
       text-decoration: none;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    :root[data-theme="dark"] .links a {
+      border-color: #314957;
+      background: rgba(24, 38, 48, 0.92);
     }
 
     .links a:hover,
-    .links a:focus {
-      border-color: var(--primary);
-      background: var(--primary-soft);
+    .links a:focus-visible {
+      border-color: var(--accent);
+      box-shadow: 0 12px 28px rgba(115, 176, 210, 0.15);
       outline: none;
+      transform: translateY(-2px);
+    }
+
+    .chapter {
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .title {
+      font-weight: 800;
+    }
+
+    @media (max-width: 680px) {
+      .wrap { width: min(100% - 22px, 1120px); padding-top: 18px; }
+      header { padding: 20px; }
+      .button { flex: 1 1 100%; }
+      .theme-toggle { flex: 1 1 100%; }
+      .links { grid-template-columns: 1fr; padding: 12px; }
     }
   </style>
 </head>
 <body>
   <main class="wrap">
     <header>
-      <h1>大学化学复习资料</h1>
-      <p>课程 PDF、章节复习、例题和刷题页面。</p>
-      <a class="primary" href="chemistry_quiz.html">进入章节刷题</a>
-      <a class="primary" href="md_viewer.html">浏览 Markdown 资料</a>
+      <div>
+        <p class="eyebrow">CHEMISTRY REVIEW</p>
+        <h1>大学化学复习资料</h1>
+        <p>课程 PDF、章节复习、例题和刷题入口集中整理，适合考前快速查阅。</p>
+      </div>
+      <div class="quick-actions" aria-label="快捷入口">
+        <a class="button primary" href="chemistry_quiz.html">进入章节刷题</a>
+        <a class="button" href="md_viewer.html">浏览 Markdown 资料</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换深色模式">深色模式</button>
+      </div>
     </header>
 
     <section aria-labelledby="pdf-title">
-      <h2 id="pdf-title">PDF 课件</h2>
+      <div class="section-head">
+        <h2 id="pdf-title">PDF 课件</h2>
+        <span class="count">12 份资料</span>
+      </div>
       <ul class="links">
-        <li><a href="01-%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E6%B0%94%E4%BD%93%E4%B8%8E%E6%B6%B2%E4%BD%93-20250219%20%E5%85%A8.pdf">01 第一章 气体与液体</a></li>
-        <li><a href="02-%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E6%BA%B6%E6%B6%B2-20250224%20%EF%BC%88%E5%85%A8%EF%BC%89.pdf">02 第二章 溶液</a></li>
-        <li><a href="03%20%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E5%8C%96%E5%AD%A6%E7%83%AD%E5%8A%9B%E5%AD%A6-20250305-%E5%8F%8D%E5%BA%94%E7%9A%84%E6%96%B9%E5%90%91-20250305(%E5%85%A8).pdf">03 第三章 化学热力学</a></li>
-        <li><a href="04%20%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8C%96%E5%AD%A6%E5%8F%8D%E5%BA%94%E7%9A%84%E9%99%90%E5%BA%A6-20250310%20(%E5%85%A8).pdf">04 第四章 化学反应的限度</a></li>
-        <li><a href="05%20%E7%AC%AC%E4%BA%94%E7%AB%A0%20%E9%85%B8%E7%A2%B1%E7%94%B5%E7%A6%BB%E5%B9%B3%E8%A1%A1-20250324%20%E5%85%A8.pdf">05 第五章 酸碱电离平衡</a></li>
-        <li><a href="07%20%E7%AC%AC%E4%B8%83%E7%AB%A0%20%E6%B0%A7%E5%8C%96%E8%BF%98%E5%8E%9F%E5%B9%B3%E8%A1%A1%E5%8F%8A%E7%94%B5%E5%8C%96%E5%AD%A6%E5%9F%BA%E7%A1%80-20250331%E5%85%A8.pdf">07 第七章 氧化还原平衡及电化学基础</a></li>
-        <li><a href="08%20%E7%AC%AC%E5%85%AB%E7%AB%A0%20%E5%8C%96%E5%AD%A6%E5%8F%8D%E5%BA%94%E7%9A%84%E9%80%9F%E7%8E%87%E4%B8%8E%E5%8C%96%E5%AD%A6%E5%8F%8D%E5%BA%94%E6%9C%BA%E7%90%86-20250331%20%E5%85%A8.pdf">08 第八章 化学反应的速率与反应机理</a></li>
-        <li><a href="09%20%E7%AC%AC%E4%B9%9D%E7%AB%A0%20%E5%8E%9F%E5%AD%90%E7%BB%93%E6%9E%84-20220329%20%E6%9C%B1.pdf">09 第九章 原子结构</a></li>
-        <li><a href="10%20%E7%AC%AC%E5%8D%81%E7%AB%A0%20%E5%88%86%E5%AD%90%E4%B8%8E%E6%99%B6%E4%BD%93%E7%BB%93%E6%9E%84-20250421%20(2).pdf">10 第十章 分子与晶体结构</a></li>
-        <li><a href="13.1%20%E6%9C%89%E6%9C%BA%E5%8C%96%E5%AD%A6%E8%AF%BE%E4%BB%B620250506.pdf">13.1 有机化学课件</a></li>
-        <li><a href="13.3%20%E9%AB%98%E5%88%86%E5%AD%90%E5%8C%96%E5%AD%A6(20250509).pdf">13.3 高分子化学</a></li>
-        <li><a href="%E3%80%8A%E6%99%AE%E9%80%9A%E5%8C%96%E5%AD%A6%E3%80%8B%E4%B9%A0%E9%A2%98%E8%A7%A3%E6%9E%90%20(%E9%AB%98%E6%9D%BE%E4%B8%BB%E7%BC%96)%20.pdf">《普通化学》习题解析</a></li>
+        <li><a href="01-%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E6%B0%94%E4%BD%93%E4%B8%8E%E6%B6%B2%E4%BD%93-20250219%20%E5%85%A8.pdf"><span class="chapter">01</span><span class="title">第一章 气体与液体</span></a></li>
+        <li><a href="02-%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E6%BA%B6%E6%B6%B2-20250224%20%EF%BC%88%E5%85%A8%EF%BC%89.pdf"><span class="chapter">02</span><span class="title">第二章 溶液</span></a></li>
+        <li><a href="03%20%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E5%8C%96%E5%AD%A6%E7%83%AD%E5%8A%9B%E5%AD%A6-20250305-%E5%8F%8D%E5%BA%94%E7%9A%84%E6%96%B9%E5%90%91-20250305(%E5%85%A8).pdf"><span class="chapter">03</span><span class="title">第三章 化学热力学</span></a></li>
+        <li><a href="04%20%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8C%96%E5%AD%A6%E5%8F%8D%E5%BA%94%E7%9A%84%E9%99%90%E5%BA%A6-20250310%20(%E5%85%A8).pdf"><span class="chapter">04</span><span class="title">第四章 化学反应的限度</span></a></li>
+        <li><a href="05%20%E7%AC%AC%E4%BA%94%E7%AB%A0%20%E9%85%B8%E7%A2%B1%E7%94%B5%E7%A6%BB%E5%B9%B3%E8%A1%A1-20250324%20%E5%85%A8.pdf"><span class="chapter">05</span><span class="title">第五章 酸碱电离平衡</span></a></li>
+        <li><a href="07%20%E7%AC%AC%E4%B8%83%E7%AB%A0%20%E6%B0%A7%E5%8C%96%E8%BF%98%E5%8E%9F%E5%B9%B3%E8%A1%A1%E5%8F%8A%E7%94%B5%E5%8C%96%E5%AD%A6%E5%9F%BA%E7%A1%80-20250331%E5%85%A8.pdf"><span class="chapter">07</span><span class="title">第七章 氧化还原平衡及电化学基础</span></a></li>
+        <li><a href="08%20%E7%AC%AC%E5%85%AB%E7%AB%A0%20%E5%8C%96%E5%AD%A6%E5%8F%8D%E5%BA%94%E7%9A%84%E9%80%9F%E7%8E%87%E4%B8%8E%E5%8C%96%E5%AD%A6%E5%8F%8D%E5%BA%94%E6%9C%BA%E7%90%86-20250331%20%E5%85%A8.pdf"><span class="chapter">08</span><span class="title">第八章 化学反应速率与机理</span></a></li>
+        <li><a href="09%20%E7%AC%AC%E4%B9%9D%E7%AB%A0%20%E5%8E%9F%E5%AD%90%E7%BB%93%E6%9E%84-20220329%20%E6%9C%B1.pdf"><span class="chapter">09</span><span class="title">第九章 原子结构</span></a></li>
+        <li><a href="10%20%E7%AC%AC%E5%8D%81%E7%AB%A0%20%E5%88%86%E5%AD%90%E4%B8%8E%E6%99%B6%E4%BD%93%E7%BB%93%E6%9E%84-20250421%20(2).pdf"><span class="chapter">10</span><span class="title">第十章 分子与晶体结构</span></a></li>
+        <li><a href="13.1%20%E6%9C%89%E6%9C%BA%E5%8C%96%E5%AD%A6%E8%AF%BE%E4%BB%B620250506.pdf"><span class="chapter">13.1</span><span class="title">有机化学课件</span></a></li>
+        <li><a href="13.3%20%E9%AB%98%E5%88%86%E5%AD%90%E5%8C%96%E5%AD%A6(20250509).pdf"><span class="chapter">13.3</span><span class="title">高分子化学</span></a></li>
+        <li><a href="%E3%80%8A%E6%99%AE%E9%80%9A%E5%8C%96%E5%AD%A6%E3%80%8B%E4%B9%A0%E9%A2%98%E8%A7%A3%E6%9E%90%20(%E9%AB%98%E6%9D%BE%E4%B8%BB%E7%BC%96)%20.pdf"><span class="chapter">习题解析</span><span class="title">《普通化学》习题解析</span></a></li>
       </ul>
     </section>
   </main>
+  <script>
+    (function initTheme() {
+      const key = "chemistry-theme";
+      const root = document.documentElement;
+      const toggle = document.querySelector("[data-theme-toggle]");
+      let saved = null;
+      try { saved = localStorage.getItem(key); } catch (error) {}
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const initial = saved || (prefersDark ? "dark" : "light");
+
+      function applyTheme(theme) {
+        root.dataset.theme = theme;
+        if (toggle) {
+          toggle.textContent = theme === "dark" ? "浅色模式" : "深色模式";
+          toggle.setAttribute("aria-pressed", String(theme === "dark"));
+        }
+      }
+
+      applyTheme(initial);
+      if (toggle) {
+        toggle.addEventListener("click", () => {
+          const next = root.dataset.theme === "dark" ? "light" : "dark";
+          try { localStorage.setItem(key, next); } catch (error) {}
+          applyTheme(next);
+        });
+      }
+    })();
+
+    document.querySelectorAll(".links a").forEach((link, index) => {
+      link.style.transitionDelay = `${Math.min(index * 18, 180)}ms`;
+    });
+  </script>
 </body>
 </html>
