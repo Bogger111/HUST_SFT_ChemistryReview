@@ -388,6 +388,77 @@
       font-weight: 850;
     }
 
+    .blank-input,
+    .formula-answer-input {
+      width: min(180px, 100%);
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 6px 9px;
+      background: var(--panel-solid);
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .blank-input {
+      display: inline-block;
+      margin: 0 4px;
+    }
+
+    .blank-input:focus,
+    .formula-answer-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(123, 191, 229, 0.18);
+      outline: none;
+    }
+
+    .formula-answer-box {
+      display: grid;
+      gap: 5px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .formula-answer-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .blank-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 0 0 16px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--primary-soft);
+    }
+
+    .blank-toolbar button {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 7px 10px;
+      background: var(--panel-solid);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .blank-toolbar button:hover,
+    .blank-toolbar button:focus-visible {
+      border-color: var(--primary);
+      outline: none;
+    }
+
     :root[data-theme="dark"] .markdown thead th {
       color: #d7f0fb;
     }
@@ -567,6 +638,8 @@
     const content = document.getElementById("content");
     const searchInput = document.getElementById("searchInput");
     const progress = document.getElementById("progress");
+    let activeBlankPath = "";
+    let blankCounter = 0;
 
     function escapeHtml(value) {
       return String(value || "")
@@ -575,8 +648,23 @@
         .replaceAll(">", "&gt;");
     }
 
+    function escapeAttribute(value) {
+      return escapeHtml(value).replaceAll("\"", "&quot;");
+    }
+
+    function blankStorageKey(path, id) {
+      return `chemistry-blank:${path}:${id}`;
+    }
+
+    function renderBlankInput() {
+      const id = `inline-${blankCounter}`;
+      blankCounter += 1;
+      return `<input class="blank-input" type="text" data-blank-id="${escapeAttribute(id)}" aria-label="填空输入框" autocomplete="off">`;
+    }
+
     function renderInline(value) {
       return escapeHtml(value)
+        .replace(/_{6,}/g, () => renderBlankInput())
         .replace(/`([^`]+)`/g, "<code>$1</code>")
         .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
         .replace(/\*([^*]+)\*/g, "<em>$1</em>")
@@ -621,6 +709,7 @@
     }
 
     function renderMarkdown(markdown) {
+      blankCounter = 0;
       const lines = markdown.replace(/\r\n/g, "\n").split("\n");
       const html = [];
       let inCode = false;
@@ -756,6 +845,55 @@
       return html.join("\n");
     }
 
+    function addFormulaAnswerInputs(path) {
+      if (!path.endsWith("formula-fill-blanks.md")) return;
+      let rowIndex = 0;
+      for (const row of content.querySelectorAll(".table-wrap tbody tr")) {
+        const cells = row.querySelectorAll("td");
+        if (cells.length < 2) continue;
+        const id = `formula-${rowIndex}`;
+        rowIndex += 1;
+        const box = document.createElement("label");
+        box.className = "formula-answer-box";
+        box.innerHTML = `
+          <span>我的答案</span>
+          <input class="formula-answer-input" type="text" data-blank-id="${escapeAttribute(id)}" autocomplete="off" aria-label="公式填空答案">
+        `;
+        cells[1].appendChild(box);
+      }
+    }
+
+    function setupInteractiveBlanks(path) {
+      addFormulaAnswerInputs(path);
+      const inputs = Array.from(content.querySelectorAll("input[data-blank-id]"));
+      if (!inputs.length) return;
+
+      for (const input of inputs) {
+        const key = blankStorageKey(path, input.dataset.blankId);
+        try {
+          input.value = localStorage.getItem(key) || "";
+        } catch (error) {}
+        input.addEventListener("input", () => {
+          try {
+            localStorage.setItem(key, input.value);
+          } catch (error) {}
+        });
+      }
+
+      const toolbar = document.createElement("div");
+      toolbar.className = "blank-toolbar";
+      toolbar.innerHTML = "<button type=\"button\">清空本页填写</button>";
+      toolbar.querySelector("button").addEventListener("click", () => {
+        for (const input of inputs) {
+          input.value = "";
+          try {
+            localStorage.removeItem(blankStorageKey(path, input.dataset.blankId));
+          } catch (error) {}
+        }
+      });
+      content.prepend(toolbar);
+    }
+
     function setActive(path) {
       for (const button of nav.querySelectorAll("button")) {
         button.classList.toggle("active", button.dataset.path === path);
@@ -763,6 +901,7 @@
     }
 
     async function loadFile(path) {
+      activeBlankPath = path;
       setActive(path);
       filePath.textContent = path;
       content.innerHTML = "<p class=\"muted\">正在加载...</p>";
@@ -782,6 +921,7 @@
         if (window.MathJax && window.MathJax.typesetPromise) {
           await window.MathJax.typesetPromise([content]);
         }
+        setupInteractiveBlanks(path);
       } catch (error) {
         content.innerHTML = `<div class="error">无法读取这个 Markdown 文件：${escapeHtml(error.message)}</div>`;
       }
