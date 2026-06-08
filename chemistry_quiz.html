@@ -398,6 +398,7 @@
         <div class="modebar">
           <button id="practiceBtn" class="active" type="button">练习模式</button>
           <button id="examBtn" type="button">考试模式</button>
+          <button id="mixedBtn" type="button">综合训练</button>
           <button id="submitAllBtn" class="primary hidden" type="button">提交全部</button>
           <button id="resetBtn" type="button">重做本章</button>
         </div>
@@ -1964,15 +1965,25 @@
     let currentSection = "全部";
     let mode = "practice";
     let examSubmitted = false;
+    let mixedQuestions = [];
+    const mixedStateKey = "__mixed__";
+    const mixedTargetCount = 30;
 
     function newState() {
       return { answers: {}, done: {}, graded: {}, correct: {}, wrong: {} };
     }
+    function stateKey() {
+      return mode === "mixed" ? mixedStateKey : currentChapterId;
+    }
     function state() {
-      if (!stateByChapter[currentChapterId]) stateByChapter[currentChapterId] = newState();
-      return stateByChapter[currentChapterId];
+      const key = stateKey();
+      if (!stateByChapter[key]) stateByChapter[key] = newState();
+      return stateByChapter[key];
     }
     function currentChapter() {
+      if (mode === "mixed") {
+        return { id: mixedStateKey, title: "综合训练", source: "跨章节随机抽题", questions: mixedQuestions };
+      }
       return quizBank.find(ch => ch.id === currentChapterId) || quizBank[0];
     }
     function currentQuestions() {
@@ -1992,10 +2003,43 @@
     }
 
     function resetCurrentChapter() {
-      stateByChapter[currentChapterId] = newState();
+      if (mode === "mixed") {
+        createMixedQuestions();
+        stateByChapter[mixedStateKey] = newState();
+      } else {
+        stateByChapter[currentChapterId] = newState();
+      }
       examSubmitted = false;
       document.getElementById("examResult").classList.add("hidden");
       render();
+    }
+    function isInstantMode() {
+      return mode === "practice" || mode === "mixed";
+    }
+    function shuffle(list) {
+      const arr = [...list];
+      for (let i = arr.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+    function createMixedQuestions() {
+      const chapters = quizBank.filter(ch => ch.questions && ch.questions.length);
+      const selected = [];
+      const used = new Set();
+      const perChapter = Math.max(1, Math.floor(mixedTargetCount / Math.max(chapters.length, 1)));
+
+      chapters.forEach(ch => {
+        shuffle(ch.questions).slice(0, perChapter).forEach(q => {
+          selected.push({ ...q, chapterTitle: ch.title });
+          used.add(q.id);
+        });
+      });
+
+      const rest = chapters.flatMap(ch => ch.questions.map(q => ({ ...q, chapterTitle: ch.title }))).filter(q => !used.has(q.id));
+      mixedQuestions = shuffle([...selected, ...shuffle(rest).slice(0, Math.max(0, mixedTargetCount - selected.length))]).slice(0, mixedTargetCount);
+      return mixedQuestions;
     }
     function normalize(v) {
       return String(v || "").toLowerCase().replace(/\s+/g, "").replace(/[，。；;,.、]/g, "");
@@ -2016,12 +2060,19 @@
     function setMode(next) {
       mode = next;
       examSubmitted = false;
+      if (mode === "mixed" && !mixedQuestions.length) createMixedQuestions();
+      if (mode === "mixed") currentSection = "全部";
       document.getElementById("practiceBtn").classList.toggle("active", mode === "practice");
       document.getElementById("examBtn").classList.toggle("active", mode === "exam");
+      document.getElementById("mixedBtn").classList.toggle("active", mode === "mixed");
       document.getElementById("submitAllBtn").classList.toggle("hidden", mode !== "exam");
-      document.getElementById("modeHint").textContent = mode === "practice"
-        ? "练习模式：每题提交后立即显示对错，可以随时查看解析。"
-        : "考试模式：作答过程中不显示答案和解析，点击提交全部后统一显示。";
+      document.getElementById("chapterSelect").disabled = mode === "mixed";
+      document.getElementById("resetBtn").textContent = mode === "mixed" ? "换一组" : "重做本章";
+      document.getElementById("modeHint").textContent = mode === "mixed"
+        ? `综合训练：从全部章节随机抽取 ${mixedQuestions.length} 题混合练习，每题提交后立即反馈。`
+        : mode === "practice"
+          ? "练习模式：每题提交后立即显示对错，可以随时查看解析。"
+          : "考试模式：作答过程中不显示答案和解析，点击提交全部后统一显示。";
       document.getElementById("examResult").classList.add("hidden");
       render();
     }
@@ -2052,13 +2103,13 @@
     function answerChoice(id, key) {
       const q = currentChapter().questions.find(x => x.id === id);
       state().answers[id] = key;
-      if (mode === "practice") mark(q, key === q.answer, key, key === q.answer ? "" : "选项不符合本章材料中的结论。");
+      if (isInstantMode()) mark(q, key === q.answer, key, key === q.answer ? "" : "选项不符合本章材料中的结论。");
       render();
     }
     function answerJudge(id, value) {
       const q = currentChapter().questions.find(x => x.id === id);
       state().answers[id] = value;
-      if (mode === "practice") mark(q, value === q.answer, value ? "正确" : "错误", value === q.answer ? "" : "判断与本章材料结论相反。");
+      if (isInstantMode()) mark(q, value === q.answer, value ? "正确" : "错误", value === q.answer ? "" : "判断与本章材料结论相反。");
       render();
     }
     function submitFill(id) {
@@ -2079,7 +2130,7 @@
       const box = document.getElementById(`answer-${id}`);
       if (box) box.classList.add("show");
       const details = document.getElementById(`details-${id}`);
-      if (details && mode === "practice") details.open = true;
+      if (details && isInstantMode()) details.open = true;
     }
     function markSubjective(id, isCorrect) {
       const q = currentChapter().questions.find(x => x.id === id);
@@ -2099,6 +2150,7 @@
       const sel = document.getElementById("chapterSelect");
       sel.innerHTML = quizBank.map(ch => `<option value="${ch.id}">${ch.title}</option>`).join("");
       sel.value = currentChapterId;
+      sel.disabled = mode === "mixed";
     }
     function renderSectionBar() {
       const sections = ["全部", ...new Set(currentChapter().questions.map(q => q.section))];
@@ -2124,11 +2176,13 @@
     function renderCard(q, num) {
       const s = state();
       const wrongTag = s.wrong[q.id] ? `<span class="tag wrong-tag">错题</span>` : "";
+      const chapterTag = q.chapterTitle ? `<span class="tag">${q.chapterTitle}</span>` : "";
       return `
         <article id="card-${q.id}" class="card ${s.wrong[q.id] ? "wrong" : ""}">
           <div class="q-head">
             <span class="q-no">第 ${num} 题</span>
             <span class="tag">${typeLabel(q.type)}</span>
+            ${chapterTag}
             <span class="tag">${q.knowledge}</span>
             ${wrongTag}
           </div>
@@ -2139,7 +2193,7 @@
             <b>参考答案：</b>
             <div>${q.answerText}</div>
             ${q.formula ? `<div class="formula">${q.formula}</div>` : ""}
-            ${needsSelfGrade(q) && mode === "practice" ? `<div class="self-row"><button class="good" onclick="markSubjective('${q.id}', true)">我答对了</button><button class="bad" onclick="markSubjective('${q.id}', false)">我答错了</button></div>` : ""}
+            ${needsSelfGrade(q) && isInstantMode() ? `<div class="self-row"><button class="good" onclick="markSubjective('${q.id}', true)">我答对了</button><button class="bad" onclick="markSubjective('${q.id}', false)">我答错了</button></div>` : ""}
           </div>
           <details id="details-${q.id}" class="${mode === "exam" && !examSubmitted ? "hidden" : ""}">
             <summary>查看解析</summary>
@@ -2181,7 +2235,7 @@
           const key = btn.dataset.option;
           btn.classList.remove("selected", "correct", "incorrect");
           if (s.answers[q.id] === key) btn.classList.add("selected");
-          if ((mode === "practice" && s.done[q.id]) || examSubmitted) {
+          if ((isInstantMode() && s.done[q.id]) || examSubmitted) {
             if (key === q.answer) btn.classList.add("correct");
             if (s.answers[q.id] === key && key !== q.answer) btn.classList.add("incorrect");
           }
@@ -2192,13 +2246,13 @@
           const value = btn.dataset.judge === "true";
           btn.classList.remove("active", "good", "bad");
           if (s.answers[q.id] === value) btn.classList.add("active");
-          if ((mode === "practice" && s.done[q.id]) || examSubmitted) {
+          if ((isInstantMode() && s.done[q.id]) || examSubmitted) {
             if (value === q.answer) btn.classList.add("good");
             if (s.answers[q.id] === value && value !== q.answer) btn.classList.add("bad");
           }
         });
       }
-      if ((mode === "practice" && s.graded[q.id]) || (examSubmitted && s.graded[q.id])) {
+      if ((isInstantMode() && s.graded[q.id]) || (examSubmitted && s.graded[q.id])) {
         showFeedback(q.id, s.correct[q.id] ? "correct" : "incorrect", s.correct[q.id] ? `回答正确。正确答案：${q.answerText}` : `回答错误。正确答案：${q.answerText}`);
       } else if (examSubmitted) {
         showFeedback(q.id, "neutral", `参考答案：${q.answerText}`);
@@ -2291,6 +2345,7 @@
     });
     document.getElementById("practiceBtn").addEventListener("click", () => setMode("practice"));
     document.getElementById("examBtn").addEventListener("click", () => setMode("exam"));
+    document.getElementById("mixedBtn").addEventListener("click", () => setMode("mixed"));
     document.getElementById("submitAllBtn").addEventListener("click", submitAll);
     document.getElementById("resetBtn").addEventListener("click", resetCurrentChapter);
     document.getElementById("previewMarkdownBtn").addEventListener("click", previewMarkdown);
