@@ -132,6 +132,24 @@
       outline: none;
     }
 
+    .sidebar-toggle {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      background: var(--panel-solid);
+      color: var(--text);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .sidebar-toggle:hover,
+    .sidebar-toggle:focus-visible {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      outline: none;
+    }
+
     h1 {
       margin: 0;
       font-size: clamp(22px, 3vw, 34px);
@@ -156,6 +174,14 @@
       grid-template-columns: 310px minmax(0, 1fr);
       gap: 16px;
       padding: 18px 0 44px;
+    }
+
+    .layout.sidebar-collapsed {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .layout.sidebar-collapsed aside {
+      display: none;
     }
 
     aside,
@@ -208,11 +234,48 @@
       margin-bottom: 14px;
     }
 
-    .group-title {
+    .group-toggle {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       margin: 0 0 8px;
+      border: 0;
+      border-radius: 6px;
+      padding: 6px 4px;
+      background: transparent;
       color: var(--primary-dark);
       font-size: 13px;
       font-weight: 900;
+      letter-spacing: 0;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .group-toggle:hover,
+    .group-toggle:focus-visible {
+      background: var(--primary-soft);
+      outline: none;
+    }
+
+    .group-toggle::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      flex: 0 0 auto;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+      transition: transform 160ms ease;
+    }
+
+    .group.is-collapsed .group-toggle::after {
+      transform: rotate(-45deg);
+    }
+
+    .group.is-collapsed .file-list {
+      display: none;
     }
 
     .file-list {
@@ -490,6 +553,7 @@
 
     @media (max-width: 860px) {
       .layout { grid-template-columns: 1fr; }
+      .layout.sidebar-collapsed aside { display: none; }
       aside {
         position: static;
         max-height: none;
@@ -508,14 +572,15 @@
       <h1>Markdown 资料浏览</h1>
       <div class="top-actions">
         <a href="index.html">返回首页</a>
+        <button class="sidebar-toggle" type="button" id="sidebarToggle" aria-controls="sidebar" aria-expanded="true">收起侧栏</button>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="切换深色模式">深色模式</button>
       </div>
     </div>
     <div class="progress" id="progress"></div>
   </header>
 
-  <main class="wrap layout">
-    <aside aria-label="Markdown 文件列表">
+  <main class="wrap layout" id="layout">
+    <aside id="sidebar" aria-label="Markdown 文件列表">
       <input class="search" id="searchInput" type="search" placeholder="搜索章节或资料">
       <nav id="fileNav"></nav>
     </aside>
@@ -648,10 +713,13 @@
 };
 
     const nav = document.getElementById("fileNav");
+    const layout = document.getElementById("layout");
+    const sidebarToggle = document.getElementById("sidebarToggle");
     const filePath = document.getElementById("filePath");
     const content = document.getElementById("content");
     const searchInput = document.getElementById("searchInput");
     const progress = document.getElementById("progress");
+    const collapsedGroups = new Set();
     let activeBlankPath = "";
     let blankCounter = 0;
 
@@ -909,7 +977,7 @@
     }
 
     function setActive(path) {
-      for (const button of nav.querySelectorAll("button")) {
+      for (const button of nav.querySelectorAll(".file-button")) {
         button.classList.toggle("active", button.dataset.path === path);
       }
     }
@@ -943,16 +1011,18 @@
 
     function buildNav(filter = "") {
       const keyword = filter.trim().toLowerCase();
-      nav.innerHTML = groups.map(group => {
+      nav.innerHTML = groups.map((group, index) => {
         const files = group.files.filter(([label, path]) => {
           const value = `${group.title} ${label} ${path}`.toLowerCase();
           return !keyword || value.includes(keyword);
         });
         if (!files.length) return "";
+        const groupId = `group-${index}`;
+        const isCollapsed = !keyword && collapsedGroups.has(group.title);
         return `
-          <section class="group">
-            <h2 class="group-title">${group.title}</h2>
-            <ul class="file-list">
+          <section class="group ${isCollapsed ? "is-collapsed" : ""}">
+            <button class="group-toggle" type="button" data-group="${escapeHtml(group.title)}" aria-controls="${groupId}" aria-expanded="${String(!isCollapsed)}">${group.title}</button>
+            <ul class="file-list" id="${groupId}">
               ${files.map(([label, path]) => `
                 <li><button class="file-button" type="button" data-path="${path}">${label}</button></li>
               `).join("")}
@@ -964,11 +1034,29 @@
     }
 
     nav.addEventListener("click", event => {
+      const groupToggle = event.target.closest(".group-toggle");
+      if (groupToggle) {
+        const groupTitle = groupToggle.dataset.group;
+        if (collapsedGroups.has(groupTitle)) {
+          collapsedGroups.delete(groupTitle);
+        } else {
+          collapsedGroups.add(groupTitle);
+        }
+        buildNav(searchInput.value);
+        return;
+      }
+
       const button = event.target.closest("button[data-path]");
       if (button) loadFile(button.dataset.path);
     });
 
     searchInput.addEventListener("input", event => buildNav(event.target.value));
+
+    sidebarToggle.addEventListener("click", () => {
+      const isCollapsed = layout.classList.toggle("sidebar-collapsed");
+      sidebarToggle.textContent = isCollapsed ? "展开侧栏" : "收起侧栏";
+      sidebarToggle.setAttribute("aria-expanded", String(!isCollapsed));
+    });
 
     addEventListener("scroll", () => {
       const doc = document.documentElement;
